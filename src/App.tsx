@@ -34,6 +34,7 @@ import SupportTicket from "@/pages/dashboard/SupportTicket";
 // Admin Pages
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import SurveyProviders from "@/pages/admin/SurveyProviders";
+import SingleLinkProviders from "@/pages/admin/SingleLinkProviders";
 import SurveyLinks from "@/pages/admin/SurveyLinks";
 import AdminContests from "@/pages/admin/AdminContests";
 import AdminTransactions from "@/pages/admin/AdminTransactions";
@@ -42,6 +43,9 @@ import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminNews from "@/pages/admin/AdminNews";
 import AdminPromocodes from "@/pages/admin/AdminPromocodes";
 import AdminPages from "@/pages/admin/AdminPages";
+import AdminPaymentMethods from "@/pages/admin/AdminPaymentMethods";
+import AdminChangePassword from "@/pages/admin/AdminChangePassword";
+import AdminUpdateProfile from "@/pages/admin/AdminUpdateProfile";
 import AdminSettings from "@/pages/admin/AdminSettings";
 
 import Index from "./pages/Index";
@@ -85,6 +89,7 @@ const App = () => (
             <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute>}>
               <Route index element={<AdminDashboard />} />
               <Route path="survey-providers" element={<SurveyProviders />} />
+              <Route path="single-link-providers" element={<SingleLinkProviders />} />
               <Route path="survey-links" element={<SurveyLinks />} />
               <Route path="contests" element={<AdminContests />} />
               <Route path="transactions" element={<AdminTransactions />} />
@@ -93,6 +98,9 @@ const App = () => (
               <Route path="news" element={<AdminNews />} />
               <Route path="promocodes" element={<AdminPromocodes />} />
               <Route path="pages" element={<AdminPages />} />
+              <Route path="payment-methods" element={<AdminPaymentMethods />} />
+              <Route path="change-password" element={<AdminChangePassword />} />
+              <Route path="update-profile" element={<AdminUpdateProfile />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
 
