@@ -8,9 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Plus, Edit, Trash2, Loader2, Search } from "lucide-react";
+import { Users, Plus, Edit, Trash2, Loader2, Search, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface User {
   id: string;
@@ -35,6 +36,8 @@ export default function AdminUsers() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -43,6 +46,23 @@ export default function AdminUsers() {
     points_balance: 0,
     cash_balance: 0,
     status: "active",
+  });
+
+  const [addFormData, setAddFormData] = useState({
+    first_name: "",
+    last_name: "",
+    username: "",
+    email: "",
+    mobile: "",
+    country: "India",
+    status: "active",
+  });
+
+  const [bulkFormData, setBulkFormData] = useState({
+    base_username: "",
+    password: "",
+    country: "India",
+    count: 1,
   });
 
   useEffect(() => {
@@ -119,6 +139,23 @@ export default function AdminUsers() {
     }
   };
 
+  const handleBulkCreate = async () => {
+    if (!bulkFormData.base_username || !bulkFormData.password || bulkFormData.count < 1) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    setIsSaving(true);
+    toast.info(`Creating ${bulkFormData.count} users... This feature requires Supabase Edge Function for user creation.`);
+    
+    // Note: Bulk user creation requires a Supabase Edge Function to create auth users
+    // This is a placeholder - actual implementation would call an edge function
+    setTimeout(() => {
+      toast.warning("Bulk user creation requires an Edge Function to be implemented. Users need to be created through Supabase Auth.");
+      setIsSaving(false);
+    }, 1500);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -126,6 +163,10 @@ export default function AdminUsers() {
           <h1 className="text-2xl font-bold">Users</h1>
           <p className="text-muted-foreground">Manage platform users</p>
         </div>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <UserPlus className="h-4 w-4 mr-2" />
+          Add User
+        </Button>
       </div>
 
       <Card>
@@ -165,6 +206,7 @@ export default function AdminUsers() {
                   <TableHead>Username</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>Mobile</TableHead>
                   <TableHead>Points</TableHead>
                   <TableHead>Cash</TableHead>
                   <TableHead>Status</TableHead>
@@ -177,6 +219,7 @@ export default function AdminUsers() {
                     <TableCell className="font-medium">{user.username}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{`${user.first_name || ""} ${user.last_name || ""}`.trim() || "-"}</TableCell>
+                    <TableCell>{user.mobile || "-"}</TableCell>
                     <TableCell>{user.points_balance || 0}</TableCell>
                     <TableCell>${(user.cash_balance || 0).toFixed(2)}</TableCell>
                     <TableCell>
@@ -202,10 +245,11 @@ export default function AdminUsers() {
         </CardContent>
       </Card>
 
+      {/* Edit User Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle>Edit User: {editingUser?.username}</DialogTitle>
             <DialogDescription>Update user details</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -284,6 +328,125 @@ export default function AdminUsers() {
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Update
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add User Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Add User</DialogTitle>
+            <DialogDescription>Create single or bulk users</DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue="single" className="mt-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="single">Single User</TabsTrigger>
+              <TabsTrigger value="bulk">Bulk Creation</TabsTrigger>
+            </TabsList>
+            <TabsContent value="single" className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>First Name</Label>
+                  <Input
+                    value={addFormData.first_name}
+                    onChange={(e) => setAddFormData({ ...addFormData, first_name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Last Name</Label>
+                  <Input
+                    value={addFormData.last_name}
+                    onChange={(e) => setAddFormData({ ...addFormData, last_name: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Username *</Label>
+                  <Input
+                    value={addFormData.username}
+                    onChange={(e) => setAddFormData({ ...addFormData, username: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Email *</Label>
+                  <Input
+                    type="email"
+                    value={addFormData.email}
+                    onChange={(e) => setAddFormData({ ...addFormData, email: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Mobile</Label>
+                  <Input
+                    value={addFormData.mobile}
+                    onChange={(e) => setAddFormData({ ...addFormData, mobile: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Country</Label>
+                  <Input
+                    value={addFormData.country}
+                    onChange={(e) => setAddFormData({ ...addFormData, country: e.target.value })}
+                  />
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Note: User creation requires Supabase Auth. Users will need to sign up through the registration page.
+              </p>
+            </TabsContent>
+            <TabsContent value="bulk" className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Base Username *</Label>
+                  <Input
+                    value={bulkFormData.base_username}
+                    onChange={(e) => setBulkFormData({ ...bulkFormData, base_username: e.target.value })}
+                    placeholder="user"
+                  />
+                  <p className="text-xs text-muted-foreground">Users will be: user1, user2, user3...</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Common Password *</Label>
+                  <Input
+                    type="password"
+                    value={bulkFormData.password}
+                    onChange={(e) => setBulkFormData({ ...bulkFormData, password: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Country</Label>
+                  <Input
+                    value={bulkFormData.country}
+                    onChange={(e) => setBulkFormData({ ...bulkFormData, country: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>How Many Users *</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={bulkFormData.count}
+                    onChange={(e) => setBulkFormData({ ...bulkFormData, count: parseInt(e.target.value) })}
+                  />
+                </div>
+              </div>
+              <Button onClick={handleBulkCreate} disabled={isSaving} className="w-full">
+                {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                Create {bulkFormData.count} Users
+              </Button>
+            </TabsContent>
+          </Tabs>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

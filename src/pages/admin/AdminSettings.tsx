@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings, Edit, Loader2 } from "lucide-react";
+import { Settings, Edit, Loader2, Globe, Mail, DollarSign, FileImage } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 
 interface SiteSetting {
   id: string;
@@ -18,247 +19,253 @@ interface SiteSetting {
   value: string;
 }
 
-interface PaymentMethod {
-  id: string;
-  name: string;
-  minimum_amount: number;
-  fee_percentage: number;
-  status: string;
-}
+const DEFAULT_SETTINGS = [
+  { key: "site_name", label: "Site Name", type: "text", category: "general" },
+  { key: "site_logo", label: "Logo URL", type: "text", category: "general" },
+  { key: "site_favicon", label: "Favicon URL", type: "text", category: "general" },
+  { key: "contact_email", label: "Contact Email", type: "email", category: "general" },
+  { key: "homepage_text", label: "Homepage Text", type: "textarea", category: "general" },
+  { key: "min_withdrawal", label: "Minimum Withdrawal ($)", type: "number", category: "payment" },
+  { key: "withdrawal_fee", label: "Withdrawal Fee (%)", type: "number", category: "payment" },
+  { key: "points_per_dollar", label: "Points Per Dollar", type: "number", category: "payment" },
+  { key: "smtp_host", label: "SMTP Host", type: "text", category: "email" },
+  { key: "smtp_port", label: "SMTP Port", type: "text", category: "email" },
+  { key: "smtp_user", label: "SMTP User", type: "text", category: "email" },
+  { key: "smtp_password", label: "SMTP Password", type: "password", category: "email" },
+  { key: "smtp_from", label: "From Email", type: "email", category: "email" },
+];
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState<SiteSetting[]>([]);
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingSetting, setEditingSetting] = useState<SiteSetting | null>(null);
-  const [editingPayment, setEditingPayment] = useState<PaymentMethod | null>(null);
+  const [editValue, setEditValue] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    fetchSettings();
   }, []);
 
-  const fetchData = async () => {
-    const [settingsRes, paymentsRes] = await Promise.all([
-      supabase.from("site_settings").select("*").order("key"),
-      supabase.from("payment_methods").select("*").order("name"),
-    ]);
+  const fetchSettings = async () => {
+    const { data, error } = await supabase
+      .from("site_settings")
+      .select("*")
+      .order("key");
 
-    if (settingsRes.data) setSettings(settingsRes.data);
-    if (paymentsRes.data) setPaymentMethods(paymentsRes.data);
+    if (!error && data) {
+      setSettings(data);
+    }
     setIsLoading(false);
   };
 
-  const handleSaveSetting = async () => {
+  const getSettingValue = (key: string) => {
+    const setting = settings.find((s) => s.key === key);
+    return setting?.value || "";
+  };
+
+  const getSettingId = (key: string) => {
+    const setting = settings.find((s) => s.key === key);
+    return setting?.id;
+  };
+
+  const handleEditClick = (key: string) => {
+    const setting = settings.find((s) => s.key === key);
+    if (setting) {
+      setEditingSetting(setting);
+      setEditValue(setting.value || "");
+    } else {
+      setEditingSetting({ id: "", key, value: "" });
+      setEditValue("");
+    }
+  };
+
+  const handleSave = async () => {
     if (!editingSetting) return;
     setIsSaving(true);
 
-    const { error } = await supabase
-      .from("site_settings")
-      .update({ value: editingSetting.value })
-      .eq("id", editingSetting.id);
+    if (editingSetting.id) {
+      const { error } = await supabase
+        .from("site_settings")
+        .update({ value: editValue })
+        .eq("id", editingSetting.id);
 
-    if (error) toast.error("Failed to save");
-    else {
-      toast.success("Setting saved!");
-      setEditingSetting(null);
-      fetchData();
+      if (error) {
+        toast.error("Failed to save");
+      } else {
+        toast.success("Setting saved!");
+        setEditingSetting(null);
+        fetchSettings();
+      }
+    } else {
+      const { error } = await supabase
+        .from("site_settings")
+        .insert({ key: editingSetting.key, value: editValue });
+
+      if (error) {
+        toast.error("Failed to save");
+      } else {
+        toast.success("Setting saved!");
+        setEditingSetting(null);
+        fetchSettings();
+      }
     }
     setIsSaving(false);
   };
 
-  const handleSavePayment = async () => {
-    if (!editingPayment) return;
-    setIsSaving(true);
-
-    const { error } = await supabase
-      .from("payment_methods")
-      .update({
-        minimum_amount: editingPayment.minimum_amount,
-        fee_percentage: editingPayment.fee_percentage,
-        status: editingPayment.status,
-      })
-      .eq("id", editingPayment.id);
-
-    if (error) toast.error("Failed to save");
-    else {
-      toast.success("Payment method saved!");
-      setEditingPayment(null);
-      fetchData();
-    }
-    setIsSaving(false);
+  const renderSettingRow = (setting: typeof DEFAULT_SETTINGS[0]) => {
+    const value = getSettingValue(setting.key);
+    return (
+      <TableRow key={setting.key}>
+        <TableCell className="font-medium">{setting.label}</TableCell>
+        <TableCell className="font-mono text-sm text-muted-foreground">
+          {setting.type === "password" && value ? "••••••••" : value || "-"}
+        </TableCell>
+        <TableCell>
+          <Button size="sm" variant="ghost" onClick={() => handleEditClick(setting.key)}>
+            <Edit className="h-4 w-4" />
+          </Button>
+        </TableCell>
+      </TableRow>
+    );
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Site Settings</h1>
-        <p className="text-muted-foreground">Manage website configuration</p>
+        <h1 className="text-2xl font-bold">Website Settings</h1>
+        <p className="text-muted-foreground">Configure global website settings</p>
       </div>
 
       {isLoading ? (
-        <Skeleton className="h-48" />
+        <Skeleton className="h-96" />
       ) : (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                General Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {settings.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No settings configured</p>
-              ) : (
+        <Tabs defaultValue="general">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="general" className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              General
+            </TabsTrigger>
+            <TabsTrigger value="payment" className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              Payment
+            </TabsTrigger>
+            <TabsTrigger value="email" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Email (SMTP)
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="general">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  General Settings
+                </CardTitle>
+                <CardDescription>Site name, logo, and branding</CardDescription>
+              </CardHeader>
+              <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Key</TableHead>
+                      <TableHead>Setting</TableHead>
                       <TableHead>Value</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {settings.map((setting) => (
-                      <TableRow key={setting.id}>
-                        <TableCell className="font-mono">{setting.key}</TableCell>
-                        <TableCell className="max-w-xs truncate">{setting.value || "-"}</TableCell>
-                        <TableCell>
-                          <Button size="sm" variant="ghost" onClick={() => setEditingSetting(setting)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {DEFAULT_SETTINGS.filter((s) => s.category === "general").map(renderSettingRow)}
                   </TableBody>
                 </Table>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Methods</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Minimum</TableHead>
-                    <TableHead>Fee %</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paymentMethods.map((method) => (
-                    <TableRow key={method.id}>
-                      <TableCell className="font-medium">{method.name}</TableCell>
-                      <TableCell>${method.minimum_amount}</TableCell>
-                      <TableCell>{method.fee_percentage}%</TableCell>
-                      <TableCell>
-                        <Badge variant={method.status === "active" ? "default" : "secondary"}>
-                          {method.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button size="sm" variant="ghost" onClick={() => setEditingPayment(method)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+          <TabsContent value="payment">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Payment Settings
+                </CardTitle>
+                <CardDescription>Withdrawal limits and fees</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Setting</TableHead>
+                      <TableHead>Value</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </>
+                  </TableHeader>
+                  <TableBody>
+                    {DEFAULT_SETTINGS.filter((s) => s.category === "payment").map(renderSettingRow)}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="email">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Email Configuration
+                </CardTitle>
+                <CardDescription>SMTP settings for sending emails</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Setting</TableHead>
+                      <TableHead>Value</TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {DEFAULT_SETTINGS.filter((s) => s.category === "email").map(renderSettingRow)}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       )}
 
-      {/* Edit Setting Dialog */}
+      {/* Edit Dialog */}
       <Dialog open={!!editingSetting} onOpenChange={() => setEditingSetting(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Setting: {editingSetting?.key}</DialogTitle>
+            <DialogTitle>
+              Edit: {DEFAULT_SETTINGS.find((s) => s.key === editingSetting?.key)?.label || editingSetting?.key}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Value</Label>
-              <Input
-                value={editingSetting?.value || ""}
-                onChange={(e) =>
-                  setEditingSetting(editingSetting ? { ...editingSetting, value: e.target.value } : null)
-                }
-              />
+              {DEFAULT_SETTINGS.find((s) => s.key === editingSetting?.key)?.type === "textarea" ? (
+                <Textarea
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  rows={4}
+                />
+              ) : (
+                <Input
+                  type={DEFAULT_SETTINGS.find((s) => s.key === editingSetting?.key)?.type || "text"}
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                />
+              )}
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingSetting(null)}>Cancel</Button>
-            <Button onClick={handleSaveSetting} disabled={isSaving}>
-              {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Save
+            <Button variant="outline" onClick={() => setEditingSetting(null)}>
+              Cancel
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Payment Dialog */}
-      <Dialog open={!!editingPayment} onOpenChange={() => setEditingPayment(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit: {editingPayment?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Minimum Amount ($)</Label>
-                <Input
-                  type="number"
-                  value={editingPayment?.minimum_amount || 0}
-                  onChange={(e) =>
-                    setEditingPayment(
-                      editingPayment ? { ...editingPayment, minimum_amount: parseFloat(e.target.value) } : null
-                    )
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Fee (%)</Label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={editingPayment?.fee_percentage || 0}
-                  onChange={(e) =>
-                    setEditingPayment(
-                      editingPayment ? { ...editingPayment, fee_percentage: parseFloat(e.target.value) } : null
-                    )
-                  }
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <Select
-                value={editingPayment?.status || "active"}
-                onValueChange={(value) =>
-                  setEditingPayment(editingPayment ? { ...editingPayment, status: value } : null)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingPayment(null)}>Cancel</Button>
-            <Button onClick={handleSavePayment} disabled={isSaving}>
+            <Button onClick={handleSave} disabled={isSaving}>
               {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Save
             </Button>
