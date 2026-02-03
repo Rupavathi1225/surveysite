@@ -35,8 +35,13 @@ import SupportTicket from "@/pages/dashboard/SupportTicket";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import SurveyProviders from "@/pages/admin/SurveyProviders";
 import SurveyLinks from "@/pages/admin/SurveyLinks";
+import AdminContests from "@/pages/admin/AdminContests";
+import AdminTransactions from "@/pages/admin/AdminTransactions";
 import AdminWithdrawals from "@/pages/admin/AdminWithdrawals";
 import AdminUsers from "@/pages/admin/AdminUsers";
+import AdminNews from "@/pages/admin/AdminNews";
+import AdminPromocodes from "@/pages/admin/AdminPromocodes";
+import AdminPages from "@/pages/admin/AdminPages";
 import AdminSettings from "@/pages/admin/AdminSettings";
 
 import Index from "./pages/Index";
@@ -81,8 +86,13 @@ const App = () => (
               <Route index element={<AdminDashboard />} />
               <Route path="survey-providers" element={<SurveyProviders />} />
               <Route path="survey-links" element={<SurveyLinks />} />
+              <Route path="contests" element={<AdminContests />} />
+              <Route path="transactions" element={<AdminTransactions />} />
               <Route path="withdrawals" element={<AdminWithdrawals />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="news" element={<AdminNews />} />
+              <Route path="promocodes" element={<AdminPromocodes />} />
+              <Route path="pages" element={<AdminPages />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
 
