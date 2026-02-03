@@ -32,6 +32,7 @@ import Leaderboard from "@/pages/dashboard/Leaderboard";
 import SupportTicket from "@/pages/dashboard/SupportTicket";
 
 // Admin Pages
+import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import SurveyProviders from "@/pages/admin/SurveyProviders";
 import SingleLinkProviders from "@/pages/admin/SingleLinkProviders";
@@ -67,6 +68,9 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
 
+            {/* Admin Login - Public */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+
             {/* User Dashboard Routes */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route index element={<Dashboard />} />
@@ -85,7 +89,7 @@ const App = () => (
               <Route path="support" element={<SupportTicket />} />
             </Route>
 
-            {/* Admin Routes */}
+            {/* Admin Routes - Requires Admin Role */}
             <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute>}>
               <Route index element={<AdminDashboard />} />
               <Route path="survey-providers" element={<SurveyProviders />} />

@@ -20,11 +20,16 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   }
 
   if (!user) {
+    // Redirect to appropriate login page
+    if (requireAdmin) {
+      return <Navigate to="/admin/login" state={{ from: location }} replace />;
+    }
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (requireAdmin && !isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+    // Non-admin trying to access admin area - redirect to admin login with message
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <>{children}</>;
