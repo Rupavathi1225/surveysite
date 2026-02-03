@@ -3,46 +3,47 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
-  History,
+  Clock,
   UserCog,
-  Inbox,
-  Users,
+  Mail,
+  Users2,
   Wallet,
-  ArrowLeftRight,
-  ClipboardList,
+  ArrowRightLeft,
+  ClipboardCheck,
   Trophy,
-  Newspaper,
-  Tag,
+  Megaphone,
+  Gift,
   Receipt,
   Medal,
-  HelpCircle,
+  LifeBuoy,
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: History, label: "Balance History", path: "/dashboard/balance-history" },
+  { icon: Clock, label: "Balance History", path: "/dashboard/balance-history" },
   { icon: UserCog, label: "Update Account", path: "/dashboard/account" },
-  { icon: Inbox, label: "Inbox", path: "/dashboard/inbox" },
-  { icon: Users, label: "Your Affiliates", path: "/dashboard/affiliates" },
+  { icon: Mail, label: "Inbox", path: "/dashboard/inbox" },
+  { icon: Users2, label: "Your Affiliates", path: "/dashboard/affiliates" },
   { icon: Wallet, label: "Withdrawal", path: "/dashboard/withdraw" },
-  { icon: ArrowLeftRight, label: "Convert Points", path: "/dashboard/convert" },
-  { icon: ClipboardList, label: "Daily Surveys", path: "/dashboard/surveys" },
+  { icon: ArrowRightLeft, label: "Convert Points", path: "/dashboard/convert" },
+  { icon: ClipboardCheck, label: "Daily Surveys", path: "/dashboard/surveys" },
   { icon: Trophy, label: "Contest", path: "/dashboard/contest" },
-  { icon: Newspaper, label: "News", path: "/dashboard/news" },
-  { icon: Tag, label: "Promocode", path: "/dashboard/promocode" },
+  { icon: Megaphone, label: "News", path: "/dashboard/news" },
+  { icon: Gift, label: "Promocode", path: "/dashboard/promocode" },
   { icon: Receipt, label: "Withdrawal History", path: "/dashboard/withdrawal-history" },
   { icon: Medal, label: "Leaderboard", path: "/dashboard/leaderboard" },
-  { icon: HelpCircle, label: "Support Ticket", path: "/dashboard/support" },
+  { icon: LifeBuoy, label: "Support Ticket", path: "/dashboard/support" },
 ];
 
 export default function DashboardSidebar() {
   const location = useLocation();
-  const { signOut, profile } = useAuth();
+  const { signOut, profile, isAdmin } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
@@ -100,8 +101,16 @@ export default function DashboardSidebar() {
           })}
         </nav>
 
-        {/* Logout */}
-        <div className="p-2 border-t">
+        {/* Admin Link & Logout */}
+        <div className="p-2 border-t space-y-1">
+          {isAdmin && (
+            <Link to="/admin">
+              <Button variant="outline" className={cn("w-full justify-start gap-3", isCollapsed && "justify-center")}>
+                <Shield className="h-5 w-5" />
+                {!isCollapsed && <span>Admin Panel</span>}
+              </Button>
+            </Link>
+          )}
           <Button
             variant="ghost"
             className={cn("w-full justify-start gap-3", isCollapsed && "justify-center")}

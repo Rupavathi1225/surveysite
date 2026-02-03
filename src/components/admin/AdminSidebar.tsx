@@ -3,34 +3,34 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
-  FileText,
-  Link as LinkIcon,
+  Globe,
+  Link2,
   Trophy,
   History,
   Wallet,
   Users,
   Settings,
-  CreditCard,
   Newspaper,
-  Tag,
+  TicketPercent,
+  FileText,
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
-  { icon: FileText, label: "Survey Providers", path: "/admin/survey-providers" },
-  { icon: LinkIcon, label: "Survey Links", path: "/admin/survey-links" },
+  { icon: Globe, label: "Survey Providers", path: "/admin/survey-providers" },
+  { icon: Link2, label: "Survey Links", path: "/admin/survey-links" },
   { icon: Trophy, label: "Contests", path: "/admin/contests" },
   { icon: History, label: "Earning History", path: "/admin/transactions" },
   { icon: Wallet, label: "Withdrawals", path: "/admin/withdrawals" },
   { icon: Users, label: "Users", path: "/admin/users" },
-  { icon: CreditCard, label: "Payment Methods", path: "/admin/payment-methods" },
   { icon: Newspaper, label: "News", path: "/admin/news" },
-  { icon: Tag, label: "Promocodes", path: "/admin/promocodes" },
+  { icon: TicketPercent, label: "Promocodes", path: "/admin/promocodes" },
   { icon: FileText, label: "Pages", path: "/admin/pages" },
   { icon: Settings, label: "Site Settings", path: "/admin/settings" },
 ];
@@ -91,7 +91,7 @@ export default function AdminSidebar() {
         <div className="p-2 border-t space-y-1">
           <Link to="/dashboard">
             <Button variant="outline" className={cn("w-full justify-start gap-3", isCollapsed && "justify-center")}>
-              <LayoutDashboard className="h-5 w-5" />
+              <Home className="h-5 w-5" />
               {!isCollapsed && <span>User Dashboard</span>}
             </Button>
           </Link>
