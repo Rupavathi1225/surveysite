@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
   Globe,
+  ExternalLink,
   Link2,
   Trophy,
   History,
@@ -13,6 +14,9 @@ import {
   Newspaper,
   TicketPercent,
   FileText,
+  CreditCard,
+  Lock,
+  User,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -24,6 +28,7 @@ import { useState } from "react";
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
   { icon: Globe, label: "Survey Providers", path: "/admin/survey-providers" },
+  { icon: ExternalLink, label: "Single Link Providers", path: "/admin/single-link-providers" },
   { icon: Link2, label: "Survey Links", path: "/admin/survey-links" },
   { icon: Trophy, label: "Contests", path: "/admin/contests" },
   { icon: History, label: "Earning History", path: "/admin/transactions" },
@@ -32,6 +37,9 @@ const menuItems = [
   { icon: Newspaper, label: "News", path: "/admin/news" },
   { icon: TicketPercent, label: "Promocodes", path: "/admin/promocodes" },
   { icon: FileText, label: "Pages", path: "/admin/pages" },
+  { icon: CreditCard, label: "Payment Methods", path: "/admin/payment-methods" },
+  { icon: Lock, label: "Change Password", path: "/admin/change-password" },
+  { icon: User, label: "Update Profile", path: "/admin/update-profile" },
   { icon: Settings, label: "Site Settings", path: "/admin/settings" },
 ];
 
