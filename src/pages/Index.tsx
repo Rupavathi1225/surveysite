@@ -1,91 +1,63 @@
-import { useState } from "react";
-import Popup from "@/components/Popup";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Sparkles, Mail, ArrowRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, DollarSign, Users, ClipboardList, Shield } from "lucide-react";
 
 const Index = () => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [email, setEmail] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Submitted email:", email);
-    setIsPopupOpen(false);
-    setEmail("");
-  };
-
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl" />
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 text-center max-w-2xl">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-secondary-foreground text-sm font-medium mb-8">
-          <Sparkles className="w-4 h-4 text-primary" />
-          Beautiful Popups
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30">
+      {/* Header */}
+      <header className="container mx-auto px-4 py-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold gradient-text">SurveySite</h1>
+        <div className="flex gap-4">
+          <Link to="/login">
+            <Button variant="ghost">Login</Button>
+          </Link>
+          <Link to="/signup">
+            <Button>Get Started</Button>
+          </Link>
         </div>
+      </header>
 
-        <h1 className="text-4xl md:text-6xl font-display font-bold text-foreground mb-6 leading-tight">
-          Elegant <span className="gradient-text">Popup</span> Components
-        </h1>
-
-        <p className="text-lg text-muted-foreground mb-10 max-w-md mx-auto">
-          Click the button below to see a beautifully animated popup with smooth
-          transitions and modern styling.
+      {/* Hero */}
+      <section className="container mx-auto px-4 py-20 text-center">
+        <h2 className="text-4xl md:text-6xl font-bold mb-6">
+          Earn Money by Sharing <span className="gradient-text">Your Opinion</span>
+        </h2>
+        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          Complete surveys, participate in contests, and refer friends to earn real cash rewards.
         </p>
+        <Link to="/signup">
+          <Button size="lg" className="gap-2">
+            Start Earning Now <ArrowRight className="h-5 w-5" />
+          </Button>
+        </Link>
+      </section>
 
-        <Button
-          onClick={() => setIsPopupOpen(true)}
-          className="gradient-primary text-primary-foreground px-8 py-6 text-lg rounded-xl font-medium shadow-glow hover:shadow-lg transition-all hover:scale-105"
-        >
-          Open Popup
-          <ArrowRight className="w-5 h-5 ml-2" />
-        </Button>
-      </div>
-
-      {/* Newsletter Popup */}
-      <Popup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        title="Stay Updated"
-      >
-        <div className="space-y-5">
-          <p className="text-muted-foreground">
-            Subscribe to our newsletter and get the latest updates, tips, and
-            exclusive content delivered straight to your inbox.
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-12 h-12 rounded-xl bg-secondary border-0 focus-visible:ring-2 focus-visible:ring-primary"
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full h-12 gradient-primary text-primary-foreground rounded-xl font-medium shadow-soft hover:shadow-glow transition-all"
-            >
-              Subscribe Now
-            </Button>
-          </form>
-
-          <p className="text-xs text-muted-foreground text-center">
-            We respect your privacy. Unsubscribe at any time.
-          </p>
+      {/* Features */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-4 gap-6">
+          {[
+            { icon: ClipboardList, title: "Daily Surveys", desc: "Complete quick surveys for instant rewards" },
+            { icon: DollarSign, title: "Cash Rewards", desc: "Withdraw via UPI, PayPal, or Bank" },
+            { icon: Users, title: "Referral Program", desc: "Earn from every friend you refer" },
+            { icon: Shield, title: "Secure Payments", desc: "Fast and secure withdrawals" },
+          ].map((feature) => (
+            <Card key={feature.title}>
+              <CardContent className="p-6 text-center">
+                <feature.icon className="h-12 w-12 mx-auto mb-4 text-primary" />
+                <h3 className="font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </Popup>
+      </section>
+
+      {/* Footer */}
+      <footer className="container mx-auto px-4 py-8 border-t text-center text-muted-foreground">
+        <p>&copy; 2024 SurveySite. All rights reserved.</p>
+      </footer>
     </div>
   );
 };
