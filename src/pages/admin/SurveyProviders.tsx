@@ -25,21 +25,16 @@ interface SurveyProvider {
   id: string;
   name: string;
   code: string;
-  point_percentage: number | null;
-  is_recommended: boolean | null;
-  rating: number | null;
-  button_text: string | null;
-  color_code: string | null;
-  button_gradient: string | null;
-  content: string | null;
-  image_url: string | null;
-  iframe_code: string | null;
-  iframe_keys: Record<string, unknown> | null;
-  postback_url: string | null;
-  postback_keys: Record<string, unknown> | null;
-  payout_type: string | null;
-  status: string | null;
-  level: number | null;
+  point_percentage: number;
+  is_recommended: boolean;
+  rating: number;
+  button_text: string;
+  color_code: string;
+  content: string;
+  iframe_code: string;
+  payout_type: string;
+  status: string;
+  level: number;
 }
 
 export default function SurveyProviders() {
@@ -48,27 +43,7 @@ export default function SurveyProviders() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingProvider, setEditingProvider] = useState<SurveyProvider | null>(null);
-  const [formData, setFormData] = useState<{
-    name: string;
-    code: string;
-    point_percentage: number;
-    is_recommended: boolean;
-    rating: number;
-    button_text: string;
-    color_code: string;
-    button_gradient: string;
-    content: string;
-    image_url: string;
-    iframe_code: string;
-    iframe_keys: Record<string, string>;
-    postback_url: string;
-    postback_keys: Record<string, string>;
-    success_status: string;
-    fail_status: string;
-    payout_type: string;
-    status: string;
-    level: number;
-  }>({
+  const [formData, setFormData] = useState({
     name: "",
     code: "",
     point_percentage: 100,
@@ -76,15 +51,8 @@ export default function SurveyProviders() {
     rating: 0,
     button_text: "Open Survey",
     color_code: "#6366f1",
-    button_gradient: "",
     content: "",
-    image_url: "",
     iframe_code: "",
-    iframe_keys: { user_id: "{user_id}", username: "{username}" },
-    postback_url: "",
-    postback_keys: { username_key: "user_id", status_key: "status", payout_key: "payout", txn_key: "trans_id" },
-    success_status: "1",
-    fail_status: "0",
     payout_type: "points",
     status: "active",
     level: 1,
@@ -101,7 +69,7 @@ export default function SurveyProviders() {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      setProviders(data as unknown as SurveyProvider[]);
+      setProviders(data);
     }
     setIsLoading(false);
   };
@@ -116,15 +84,8 @@ export default function SurveyProviders() {
       rating: provider.rating || 0,
       button_text: provider.button_text || "Open Survey",
       color_code: provider.color_code || "#6366f1",
-      button_gradient: provider.button_gradient || "",
       content: provider.content || "",
-      image_url: provider.image_url || "",
       iframe_code: provider.iframe_code || "",
-      iframe_keys: (provider.iframe_keys as Record<string, string>) || { user_id: "{user_id}", username: "{username}" },
-      postback_url: provider.postback_url || "",
-      postback_keys: (provider.postback_keys as Record<string, string>) || { username_key: "user_id", status_key: "status", payout_key: "payout", txn_key: "trans_id" },
-      success_status: "1",
-      fail_status: "0",
       payout_type: provider.payout_type || "points",
       status: provider.status || "active",
       level: provider.level || 1,
@@ -142,15 +103,8 @@ export default function SurveyProviders() {
       rating: 0,
       button_text: "Open Survey",
       color_code: "#6366f1",
-      button_gradient: "",
       content: "",
-      image_url: "",
       iframe_code: "",
-      iframe_keys: { user_id: "{user_id}", username: "{username}" },
-      postback_url: "",
-      postback_keys: { username_key: "user_id", status_key: "status", payout_key: "payout", txn_key: "trans_id" },
-      success_status: "1",
-      fail_status: "0",
       payout_type: "points",
       status: "active",
       level: 1,
@@ -280,13 +234,12 @@ export default function SurveyProviders() {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingProvider ? "Edit Provider" : "Add Provider"}</DialogTitle>
-            <DialogDescription>Configure the survey provider settings including postback</DialogDescription>
+            <DialogDescription>Configure the survey provider settings</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {/* Basic Info */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Name *</Label>
@@ -305,7 +258,6 @@ export default function SurveyProviders() {
                 />
               </div>
             </div>
-
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Point %</Label>
@@ -334,9 +286,7 @@ export default function SurveyProviders() {
                 />
               </div>
             </div>
-
-            {/* UI Settings */}
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Button Text</Label>
                 <Input
@@ -352,25 +302,7 @@ export default function SurveyProviders() {
                   onChange={(e) => setFormData({ ...formData, color_code: e.target.value })}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Button Gradient</Label>
-                <Input
-                  value={formData.button_gradient}
-                  onChange={(e) => setFormData({ ...formData, button_gradient: e.target.value })}
-                  placeholder="linear-gradient(90deg, #6366f1, #8b5cf6)"
-                />
-              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label>Image URL</Label>
-              <Input
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                placeholder="https://example.com/logo.png"
-              />
-            </div>
-
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Payout Type</Label>
@@ -403,7 +335,6 @@ export default function SurveyProviders() {
                 </Select>
               </div>
             </div>
-
             <div className="flex items-center gap-2">
               <Switch
                 checked={formData.is_recommended}
@@ -411,9 +342,8 @@ export default function SurveyProviders() {
               />
               <Label>Is Recommended</Label>
             </div>
-
             <div className="space-y-2">
-              <Label>Content / Description</Label>
+              <Label>Content</Label>
               <Textarea
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -421,102 +351,14 @@ export default function SurveyProviders() {
                 rows={3}
               />
             </div>
-
-            {/* Iframe Section */}
-            <div className="border rounded-lg p-4 space-y-4">
-              <h3 className="font-semibold">Iframe Configuration</h3>
-              <div className="space-y-2">
-                <Label>Iframe Code</Label>
-                <Textarea
-                  value={formData.iframe_code}
-                  onChange={(e) => setFormData({ ...formData, iframe_code: e.target.value })}
-                  placeholder="<iframe src='...'></iframe>"
-                  rows={4}
-                />
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>User ID Key</Label>
-                  <Input
-                    value={formData.iframe_keys.user_id || ""}
-                    onChange={(e) => setFormData({ ...formData, iframe_keys: { ...formData.iframe_keys, user_id: e.target.value } })}
-                    placeholder="{user_id}"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Username Key</Label>
-                  <Input
-                    value={formData.iframe_keys.username || ""}
-                    onChange={(e) => setFormData({ ...formData, iframe_keys: { ...formData.iframe_keys, username: e.target.value } })}
-                    placeholder="{username}"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Postback Section */}
-            <div className="border rounded-lg p-4 space-y-4">
-              <h3 className="font-semibold">Postback Configuration</h3>
-              <div className="space-y-2">
-                <Label>Postback URL (Auto-generated)</Label>
-                <Input
-                  value={`https://msqssfqcrclurfuskipd.supabase.co/functions/v1/postback/${formData.code}?user_id={user_id}&status={status}&payout={payout}&txn_id={txn_id}`}
-                  readOnly
-                  className="font-mono text-xs bg-muted"
-                />
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Username Key</Label>
-                  <Input
-                    value={formData.postback_keys.username_key || ""}
-                    onChange={(e) => setFormData({ ...formData, postback_keys: { ...formData.postback_keys, username_key: e.target.value } })}
-                    placeholder="user_id"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Status Key</Label>
-                  <Input
-                    value={formData.postback_keys.status_key || ""}
-                    onChange={(e) => setFormData({ ...formData, postback_keys: { ...formData.postback_keys, status_key: e.target.value } })}
-                    placeholder="status"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Payout Key</Label>
-                  <Input
-                    value={formData.postback_keys.payout_key || ""}
-                    onChange={(e) => setFormData({ ...formData, postback_keys: { ...formData.postback_keys, payout_key: e.target.value } })}
-                    placeholder="payout"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Transaction ID Key</Label>
-                  <Input
-                    value={formData.postback_keys.txn_key || ""}
-                    onChange={(e) => setFormData({ ...formData, postback_keys: { ...formData.postback_keys, txn_key: e.target.value } })}
-                    placeholder="trans_id"
-                  />
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Success Status Value</Label>
-                  <Input
-                    value={formData.success_status}
-                    onChange={(e) => setFormData({ ...formData, success_status: e.target.value })}
-                    placeholder="1"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Fail Status Value</Label>
-                  <Input
-                    value={formData.fail_status}
-                    onChange={(e) => setFormData({ ...formData, fail_status: e.target.value })}
-                    placeholder="0"
-                  />
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label>Iframe Code</Label>
+              <Textarea
+                value={formData.iframe_code}
+                onChange={(e) => setFormData({ ...formData, iframe_code: e.target.value })}
+                placeholder="<iframe>...</iframe>"
+                rows={4}
+              />
             </div>
           </div>
           <DialogFooter>
