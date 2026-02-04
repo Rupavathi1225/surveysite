@@ -50,6 +50,7 @@ import AdminUpdateProfile from "@/pages/admin/AdminUpdateProfile";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminLoginLogs from "@/pages/admin/AdminLoginLogs";
 import AdminNotifications from "@/pages/admin/AdminNotifications";
+import AdminSubadmins from "@/pages/admin/AdminSubadmins";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -110,6 +111,7 @@ const App = () => (
               <Route path="settings" element={<AdminSettings />} />
               <Route path="login-logs" element={<AdminLoginLogs />} />
               <Route path="notifications" element={<AdminNotifications />} />
+              <Route path="subadmins" element={<AdminSubadmins />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
