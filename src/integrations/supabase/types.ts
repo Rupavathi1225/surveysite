@@ -14,39 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      admin_chats: {
-        Row: {
-          admin_id: string | null
-          created_at: string | null
-          credits_used: number | null
-          id: string
-          is_admin_reply: boolean | null
-          is_read: boolean | null
-          message: string
-          user_id: string
-        }
-        Insert: {
-          admin_id?: string | null
-          created_at?: string | null
-          credits_used?: number | null
-          id?: string
-          is_admin_reply?: boolean | null
-          is_read?: boolean | null
-          message: string
-          user_id: string
-        }
-        Update: {
-          admin_id?: string | null
-          created_at?: string | null
-          credits_used?: number | null
-          id?: string
-          is_admin_reply?: boolean | null
-          is_read?: boolean | null
-          message?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       contest_entries: {
         Row: {
           contest_id: string
@@ -89,61 +56,12 @@ export type Database = {
           },
         ]
       }
-      contest_notifications: {
-        Row: {
-          contest_id: string
-          created_at: string
-          id: string
-          notification_type: string | null
-          notified_at: string | null
-          points_earned: number | null
-          rank: number | null
-          user_id: string
-        }
-        Insert: {
-          contest_id: string
-          created_at?: string
-          id?: string
-          notification_type?: string | null
-          notified_at?: string | null
-          points_earned?: number | null
-          rank?: number | null
-          user_id: string
-        }
-        Update: {
-          contest_id?: string
-          created_at?: string
-          id?: string
-          notification_type?: string | null
-          notified_at?: string | null
-          points_earned?: number | null
-          rank?: number | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contest_notifications_contest_id_fkey"
-            columns: ["contest_id"]
-            isOneToOne: false
-            referencedRelation: "contests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contest_notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       contests: {
         Row: {
           amount: number
           created_at: string
           description: string | null
           end_date: string
-          excluded_users: string[] | null
           id: string
           start_date: string
           status: string | null
@@ -154,7 +72,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date: string
-          excluded_users?: string[] | null
           id?: string
           start_date: string
           status?: string | null
@@ -165,72 +82,12 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string
-          excluded_users?: string[] | null
           id?: string
           start_date?: string
           status?: string | null
           title?: string
         }
         Relationships: []
-      }
-      conversations: {
-        Row: {
-          created_at: string | null
-          id: string
-          last_message_at: string | null
-          participant_one: string
-          participant_two: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          last_message_at?: string | null
-          participant_one: string
-          participant_two: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          last_message_at?: string | null
-          participant_one?: string
-          participant_two?: string
-        }
-        Relationships: []
-      }
-      direct_messages: {
-        Row: {
-          content: string
-          conversation_id: string
-          created_at: string | null
-          id: string
-          is_read: boolean | null
-          sender_id: string
-        }
-        Insert: {
-          content: string
-          conversation_id: string
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          sender_id: string
-        }
-        Update: {
-          content?: string
-          conversation_id?: string
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          sender_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "direct_messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       earning_history: {
         Row: {
@@ -289,36 +146,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      login_logs: {
-        Row: {
-          email: string
-          id: string
-          ip_address: string | null
-          login_at: string
-          status: string
-          user_agent: string | null
-          user_id: string
-        }
-        Insert: {
-          email: string
-          id?: string
-          ip_address?: string | null
-          login_at?: string
-          status?: string
-          user_agent?: string | null
-          user_id: string
-        }
-        Update: {
-          email?: string
-          id?: string
-          ip_address?: string | null
-          login_at?: string
-          status?: string
-          user_agent?: string | null
-          user_id?: string
-        }
-        Relationships: []
       }
       messages: {
         Row: {
@@ -381,82 +208,6 @@ export type Database = {
           title?: string
         }
         Relationships: []
-      }
-      notification_comments: {
-        Row: {
-          comment: string
-          created_at: string | null
-          id: string
-          is_admin: boolean | null
-          notification_id: string
-          user_id: string
-        }
-        Insert: {
-          comment: string
-          created_at?: string | null
-          id?: string
-          is_admin?: boolean | null
-          notification_id: string
-          user_id: string
-        }
-        Update: {
-          comment?: string
-          created_at?: string | null
-          id?: string
-          is_admin?: boolean | null
-          notification_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_comments_notification_id_fkey"
-            columns: ["notification_id"]
-            isOneToOne: false
-            referencedRelation: "notifications"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notifications: {
-        Row: {
-          created_at: string
-          id: string
-          is_global: boolean
-          is_read: boolean
-          message: string
-          title: string
-          type: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_global?: boolean
-          is_read?: boolean
-          message: string
-          title: string
-          type?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_global?: boolean
-          is_read?: boolean
-          message?: string
-          title?: string
-          type?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       pages: {
         Row: {
@@ -1007,13 +758,9 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_conversation_participant: {
-        Args: { _conversation_id: string; _profile_id: string }
-        Returns: boolean
-      }
     }
     Enums: {
-      app_role: "admin" | "user" | "subadmin"
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1141,7 +888,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "subadmin"],
+      app_role: ["admin", "user"],
     },
   },
 } as const
