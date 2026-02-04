@@ -56,6 +56,7 @@ export default function AdminUsers() {
     mobile: "",
     country: "India",
     status: "active",
+    role: "user" as "user" | "admin" | "subadmin",
   });
 
   const [bulkFormData, setBulkFormData] = useState({
@@ -394,6 +395,22 @@ export default function AdminUsers() {
                     onChange={(e) => setAddFormData({ ...addFormData, country: e.target.value })}
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select
+                  value={addFormData.role}
+                  onValueChange={(value: "user" | "admin" | "subadmin") => setAddFormData({ ...addFormData, role: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="subadmin">Sub Admin</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <p className="text-sm text-muted-foreground">
                 Note: User creation requires Supabase Auth. Users will need to sign up through the registration page.
