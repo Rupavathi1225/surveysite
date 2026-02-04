@@ -56,61 +56,12 @@ export type Database = {
           },
         ]
       }
-      contest_notifications: {
-        Row: {
-          contest_id: string
-          created_at: string
-          id: string
-          notification_type: string | null
-          notified_at: string | null
-          points_earned: number | null
-          rank: number | null
-          user_id: string
-        }
-        Insert: {
-          contest_id: string
-          created_at?: string
-          id?: string
-          notification_type?: string | null
-          notified_at?: string | null
-          points_earned?: number | null
-          rank?: number | null
-          user_id: string
-        }
-        Update: {
-          contest_id?: string
-          created_at?: string
-          id?: string
-          notification_type?: string | null
-          notified_at?: string | null
-          points_earned?: number | null
-          rank?: number | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contest_notifications_contest_id_fkey"
-            columns: ["contest_id"]
-            isOneToOne: false
-            referencedRelation: "contests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contest_notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       contests: {
         Row: {
           amount: number
           created_at: string
           description: string | null
           end_date: string
-          excluded_users: string[] | null
           id: string
           start_date: string
           status: string | null
@@ -121,7 +72,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date: string
-          excluded_users?: string[] | null
           id?: string
           start_date: string
           status?: string | null
@@ -132,7 +82,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string
-          excluded_users?: string[] | null
           id?: string
           start_date?: string
           status?: string | null
@@ -198,36 +147,6 @@ export type Database = {
           },
         ]
       }
-      login_logs: {
-        Row: {
-          email: string
-          id: string
-          ip_address: string | null
-          login_at: string
-          status: string
-          user_agent: string | null
-          user_id: string
-        }
-        Insert: {
-          email: string
-          id?: string
-          ip_address?: string | null
-          login_at?: string
-          status?: string
-          user_agent?: string | null
-          user_id: string
-        }
-        Update: {
-          email?: string
-          id?: string
-          ip_address?: string | null
-          login_at?: string
-          status?: string
-          user_agent?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       messages: {
         Row: {
           created_at: string
@@ -289,47 +208,6 @@ export type Database = {
           title?: string
         }
         Relationships: []
-      }
-      notifications: {
-        Row: {
-          created_at: string
-          id: string
-          is_global: boolean
-          is_read: boolean
-          message: string
-          title: string
-          type: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_global?: boolean
-          is_read?: boolean
-          message: string
-          title: string
-          type?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_global?: boolean
-          is_read?: boolean
-          message?: string
-          title?: string
-          type?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       pages: {
         Row: {
@@ -882,7 +760,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "subadmin"
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1010,7 +888,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "subadmin"],
+      app_role: ["admin", "user"],
     },
   },
 } as const

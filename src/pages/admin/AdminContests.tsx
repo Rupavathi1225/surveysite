@@ -8,13 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Trophy, Plus, Edit, Trash2, Loader2, UserMinus, Bell } from "lucide-react";
+import { Trophy, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface Contest {
   id: string;
@@ -24,26 +22,15 @@ interface Contest {
   start_date: string;
   end_date: string;
   status: string | null;
-  excluded_users: string[] | null;
   created_at: string;
-}
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
 }
 
 export default function AdminContests() {
   const [contests, setContests] = useState<Contest[]>([]);
-  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingContest, setEditingContest] = useState<Contest | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isExcludeOpen, setIsExcludeOpen] = useState(false);
-  const [selectedContest, setSelectedContest] = useState<Contest | null>(null);
-  const [excludedUserIds, setExcludedUserIds] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -51,12 +38,10 @@ export default function AdminContests() {
     start_date: "",
     end_date: "",
     status: "active",
-    excluded_users: [] as string[],
   });
 
   useEffect(() => {
     fetchContests();
-    fetchUsers();
   }, []);
 
   const fetchContests = async () => {
@@ -66,39 +51,18 @@ export default function AdminContests() {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      setContests(data as Contest[]);
+      setContests(data);
     }
     setIsLoading(false);
-  };
-
-  const fetchUsers = async () => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, username, email")
-      .order("username");
-
-    if (!error && data) {
-      setAllUsers(data);
-    }
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     
-    const saveData = {
-      title: formData.title,
-      description: formData.description,
-      amount: formData.amount,
-      start_date: formData.start_date,
-      end_date: formData.end_date,
-      status: formData.status,
-      excluded_users: formData.excluded_users,
-    };
-    
     if (editingContest) {
       const { error } = await supabase
         .from("contests")
-        .update(saveData)
+        .update(formData)
         .eq("id", editingContest.id);
 
       if (error) toast.error("Failed to update");
@@ -108,7 +72,7 @@ export default function AdminContests() {
         fetchContests();
       }
     } else {
-      const { error } = await supabase.from("contests").insert(saveData);
+      const { error } = await supabase.from("contests").insert(formData);
 
       if (error) toast.error("Failed to create");
       else {
@@ -137,7 +101,6 @@ export default function AdminContests() {
       start_date: contest.start_date.split("T")[0],
       end_date: contest.end_date.split("T")[0],
       status: contest.status || "active",
-      excluded_users: contest.excluded_users || [],
     });
     setEditingContest(contest);
   };
@@ -150,71 +113,8 @@ export default function AdminContests() {
       start_date: "",
       end_date: "",
       status: "active",
-      excluded_users: [],
     });
     setIsAddOpen(true);
-  };
-
-  const openExcludeUsers = (contest: Contest) => {
-    setSelectedContest(contest);
-    setExcludedUserIds(contest.excluded_users || []);
-    setIsExcludeOpen(true);
-  };
-
-  const handleSaveExclusions = async () => {
-    if (!selectedContest) return;
-    
-    setIsSaving(true);
-    const { error } = await supabase
-      .from("contests")
-      .update({ excluded_users: excludedUserIds })
-      .eq("id", selectedContest.id);
-
-    if (error) {
-      toast.error("Failed to update exclusions");
-    } else {
-      toast.success("Exclusions updated!");
-      setIsExcludeOpen(false);
-      fetchContests();
-    }
-    setIsSaving(false);
-  };
-
-  const handleNotifyContestEnd = async (contest: Contest) => {
-    // Check if contest has ended
-    const endDate = new Date(contest.end_date);
-    const now = new Date();
-    
-    if (endDate > now) {
-      toast.error("Contest hasn't ended yet");
-      return;
-    }
-
-    // Fetch contest entries with user earnings
-    const { data: entries, error } = await supabase
-      .from("contest_entries")
-      .select("*, profiles(username, email)")
-      .eq("contest_id", contest.id)
-      .order("points", { ascending: false });
-
-    if (error || !entries || entries.length === 0) {
-      toast.error("No entries found for this contest");
-      return;
-    }
-
-    // Create notifications for each participant
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i];
-      await supabase.from("notifications").insert({
-        user_id: entry.user_id,
-        title: `Contest Results: ${contest.title}`,
-        message: `The contest has ended! You earned ${entry.points || 0} points and ranked #${i + 1}. Prize pool: $${contest.amount}`,
-        type: "info",
-        is_global: false,
-      });
-    }
-
-    toast.success(`Notified ${entries.length} participants!`);
   };
 
   return (
@@ -258,7 +158,6 @@ export default function AdminContests() {
                   <TableHead>Start Date</TableHead>
                   <TableHead>End Date</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Excluded</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -275,18 +174,9 @@ export default function AdminContests() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {contest.excluded_users?.length || 0} excluded
-                    </TableCell>
-                    <TableCell>
                       <div className="flex gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => openEdit(contest)} title="Edit">
+                        <Button size="sm" variant="ghost" onClick={() => openEdit(contest)}>
                           <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => openExcludeUsers(contest)} title="Manage Exclusions">
-                          <UserMinus className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleNotifyContestEnd(contest)} title="Send End Notifications">
-                          <Bell className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDelete(contest.id)}>
                           <Trash2 className="h-4 w-4" />
@@ -366,51 +256,6 @@ export default function AdminContests() {
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Save
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Exclude Users Dialog */}
-      <Dialog open={isExcludeOpen} onOpenChange={setIsExcludeOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Exclude Users from: {selectedContest?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Label className="mb-2 block">Select users to exclude from this contest:</Label>
-            <ScrollArea className="h-[300px] border rounded-md p-2">
-              <div className="space-y-2">
-                {allUsers.map((user) => (
-                  <div key={user.id} className="flex items-center space-x-2 p-2 hover:bg-muted/50 rounded">
-                    <Checkbox
-                      id={user.id}
-                      checked={excludedUserIds.includes(user.id)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setExcludedUserIds([...excludedUserIds, user.id]);
-                        } else {
-                          setExcludedUserIds(excludedUserIds.filter(id => id !== user.id));
-                        }
-                      }}
-                    />
-                    <label htmlFor={user.id} className="text-sm cursor-pointer flex-1">
-                      <span className="font-medium">{user.username}</span>
-                      <span className="text-muted-foreground ml-2">({user.email})</span>
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-            <p className="text-sm text-muted-foreground mt-2">
-              {excludedUserIds.length} user(s) selected for exclusion
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsExcludeOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveExclusions} disabled={isSaving}>
-              {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Save Exclusions
             </Button>
           </DialogFooter>
         </DialogContent>
