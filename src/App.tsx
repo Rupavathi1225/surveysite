@@ -30,6 +30,7 @@ import Promocode from "@/pages/dashboard/Promocode";
 import WithdrawalHistory from "@/pages/dashboard/WithdrawalHistory";
 import Leaderboard from "@/pages/dashboard/Leaderboard";
 import SupportTicket from "@/pages/dashboard/SupportTicket";
+import Messages from "@/pages/dashboard/Messages";
 
 // Admin Pages
 import AdminLogin from "@/pages/admin/AdminLogin";
@@ -90,6 +91,7 @@ const App = () => (
               <Route path="withdrawal-history" element={<WithdrawalHistory />} />
               <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="support" element={<SupportTicket />} />
+              <Route path="messages" element={<Messages />} />
             </Route>
 
             {/* Admin Routes - Requires Admin Role */}
