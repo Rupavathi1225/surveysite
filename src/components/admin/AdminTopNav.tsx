@@ -21,6 +21,8 @@ import {
   Home,
   ChevronDown,
   Menu,
+  Activity,
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +44,11 @@ const mainMenuItems = [
   { icon: History, label: "Earning History", path: "/admin/transactions" },
   { icon: Wallet, label: "Withdrawals", path: "/admin/withdrawals" },
   { icon: Users, label: "Users", path: "/admin/users" },
+];
+
+const monitoringMenuItems = [
+  { icon: Activity, label: "Login Logs", path: "/admin/login-logs" },
+  { icon: Bell, label: "Notifications", path: "/admin/notifications" },
 ];
 
 const mastersMenuItems = [
@@ -104,6 +111,27 @@ export default function AdminTopNav() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               {mainMenuItems.slice(4).map((item) => (
+                <DropdownMenuItem key={item.path} asChild>
+                  <Link to={item.path} className="flex items-center gap-2">
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Monitoring Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1">
+                <Activity className="h-4 w-4" />
+                Monitoring
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              {monitoringMenuItems.map((item) => (
                 <DropdownMenuItem key={item.path} asChild>
                   <Link to={item.path} className="flex items-center gap-2">
                     <item.icon className="h-4 w-4" />
@@ -184,6 +212,13 @@ export default function AdminTopNav() {
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-muted-foreground uppercase px-3 mb-2">Main</p>
                 {mainMenuItems.map((item) => (
+                  <NavItem key={item.path} item={item} onClick={() => setMobileOpen(false)} />
+                ))}
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-muted-foreground uppercase px-3 mb-2">Monitoring</p>
+                {monitoringMenuItems.map((item) => (
                   <NavItem key={item.path} item={item} onClick={() => setMobileOpen(false)} />
                 ))}
               </div>
