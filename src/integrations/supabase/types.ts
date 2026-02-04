@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_chats: {
+        Row: {
+          admin_id: string | null
+          created_at: string | null
+          credits_used: number | null
+          id: string
+          is_admin_reply: boolean | null
+          is_read: boolean | null
+          message: string
+          user_id: string
+        }
+        Insert: {
+          admin_id?: string | null
+          created_at?: string | null
+          credits_used?: number | null
+          id?: string
+          is_admin_reply?: boolean | null
+          is_read?: boolean | null
+          message: string
+          user_id: string
+        }
+        Update: {
+          admin_id?: string | null
+          created_at?: string | null
+          credits_used?: number | null
+          id?: string
+          is_admin_reply?: boolean | null
+          is_read?: boolean | null
+          message?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       contest_entries: {
         Row: {
           contest_id: string
@@ -348,6 +381,41 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      notification_comments: {
+        Row: {
+          comment: string
+          created_at: string | null
+          id: string
+          is_admin: boolean | null
+          notification_id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string | null
+          id?: string
+          is_admin?: boolean | null
+          notification_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string | null
+          id?: string
+          is_admin?: boolean | null
+          notification_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_comments_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {

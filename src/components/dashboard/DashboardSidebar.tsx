@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageCircle,
+  MessageSquare,
   Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ const menuItems = [
   { icon: Medal, label: "Leaderboard", path: "/dashboard/leaderboard" },
   { icon: LifeBuoy, label: "Support Ticket", path: "/dashboard/support" },
   { icon: MessageCircle, label: "Messages", path: "/dashboard/messages" },
+  { icon: MessageSquare, label: "Chat & Notify", path: "/dashboard/chat" },
 ];
 
 export default function DashboardSidebar() {

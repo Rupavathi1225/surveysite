@@ -24,6 +24,7 @@ import {
   Activity,
   Bell,
   Shield,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,6 +51,7 @@ const mainMenuItems = [
 const monitoringMenuItems = [
   { icon: Activity, label: "Login Logs", path: "/admin/login-logs" },
   { icon: Bell, label: "Notifications", path: "/admin/notifications" },
+  { icon: MessageSquare, label: "User Chats", path: "/admin/chats" },
   { icon: Shield, label: "Subadmins", path: "/admin/subadmins" },
 ];
 
