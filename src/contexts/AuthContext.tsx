@@ -33,6 +33,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   isAdmin: boolean;
+  isSubAdmin: boolean;
   isLoading: boolean;
   signUp: (email: string, password: string, username: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -48,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSubAdmin, setIsSubAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
@@ -66,11 +68,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .single();
+      .eq("user_id", userId);
 
-    setIsAdmin(!error && !!data);
+    if (!error && data) {
+      setIsAdmin(data.some((r) => r.role === "admin"));
+      setIsSubAdmin(data.some((r) => r.role === "subadmin"));
+    } else {
+      setIsAdmin(false);
+      setIsSubAdmin(false);
+    }
   };
 
   const refreshProfile = async () => {
@@ -126,10 +132,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    // Log the login attempt
+    if (data.user) {
+      await supabase.from("login_logs").insert({
+        user_id: data.user.id,
+        email: data.user.email || email,
+        status: "success",
+      });
+    }
+
     return { error };
   };
 
@@ -137,6 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setProfile(null);
     setIsAdmin(false);
+    setIsSubAdmin(false);
   };
 
   const resetPassword = async (email: string) => {
@@ -153,6 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         profile,
         isAdmin,
+        isSubAdmin,
         isLoading,
         signUp,
         signIn,
