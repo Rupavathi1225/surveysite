@@ -23,6 +23,7 @@ import {
   Menu,
   Activity,
   Bell,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +50,7 @@ const mainMenuItems = [
 const monitoringMenuItems = [
   { icon: Activity, label: "Login Logs", path: "/admin/login-logs" },
   { icon: Bell, label: "Notifications", path: "/admin/notifications" },
+  { icon: Shield, label: "Subadmins", path: "/admin/subadmins" },
 ];
 
 const mastersMenuItems = [
@@ -186,6 +188,11 @@ export default function AdminTopNav() {
 
         {/* Right side actions */}
         <div className="hidden lg:flex items-center gap-2 ml-auto">
+          <Link to="/admin/notifications">
+            <Button variant="ghost" size="icon" title="Notifications">
+              <Bell className="h-5 w-5" />
+            </Button>
+          </Link>
           <Link to="/dashboard">
             <Button variant="outline" size="sm">
               <Home className="h-4 w-4 mr-2" />

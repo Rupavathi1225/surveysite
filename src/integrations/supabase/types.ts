@@ -56,12 +56,61 @@ export type Database = {
           },
         ]
       }
+      contest_notifications: {
+        Row: {
+          contest_id: string
+          created_at: string
+          id: string
+          notification_type: string | null
+          notified_at: string | null
+          points_earned: number | null
+          rank: number | null
+          user_id: string
+        }
+        Insert: {
+          contest_id: string
+          created_at?: string
+          id?: string
+          notification_type?: string | null
+          notified_at?: string | null
+          points_earned?: number | null
+          rank?: number | null
+          user_id: string
+        }
+        Update: {
+          contest_id?: string
+          created_at?: string
+          id?: string
+          notification_type?: string | null
+          notified_at?: string | null
+          points_earned?: number | null
+          rank?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contest_notifications_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "contests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contest_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contests: {
         Row: {
           amount: number
           created_at: string
           description: string | null
           end_date: string
+          excluded_users: string[] | null
           id: string
           start_date: string
           status: string | null
@@ -72,6 +121,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date: string
+          excluded_users?: string[] | null
           id?: string
           start_date: string
           status?: string | null
@@ -82,6 +132,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string
+          excluded_users?: string[] | null
           id?: string
           start_date?: string
           status?: string | null
