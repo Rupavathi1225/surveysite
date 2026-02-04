@@ -114,7 +114,7 @@ export default function AdminTopNav() {
             <DropdownMenuContent align="start">
               {mainMenuItems.slice(4).map((item) => (
                 <DropdownMenuItem key={item.path} asChild>
-                  <Link to={item.path} className="flex items-center gap-2">
+                  <Link to={item.path} className="flex items-center gap-2 w-full cursor-pointer">
                     <item.icon className="h-4 w-4" />
                     {item.label}
                   </Link>
@@ -135,7 +135,7 @@ export default function AdminTopNav() {
             <DropdownMenuContent align="start">
               {monitoringMenuItems.map((item) => (
                 <DropdownMenuItem key={item.path} asChild>
-                  <Link to={item.path} className="flex items-center gap-2">
+                  <Link to={item.path} className="flex items-center gap-2 w-full cursor-pointer">
                     <item.icon className="h-4 w-4" />
                     {item.label}
                   </Link>
@@ -155,7 +155,7 @@ export default function AdminTopNav() {
             <DropdownMenuContent align="start">
               {mastersMenuItems.map((item) => (
                 <DropdownMenuItem key={item.path} asChild>
-                  <Link to={item.path} className="flex items-center gap-2">
+                  <Link to={item.path} className="flex items-center gap-2 w-full cursor-pointer">
                     <item.icon className="h-4 w-4" />
                     {item.label}
                   </Link>
@@ -176,7 +176,7 @@ export default function AdminTopNav() {
             <DropdownMenuContent align="start">
               {settingsMenuItems.map((item) => (
                 <DropdownMenuItem key={item.path} asChild>
-                  <Link to={item.path} className="flex items-center gap-2">
+                  <Link to={item.path} className="flex items-center gap-2 w-full cursor-pointer">
                     <item.icon className="h-4 w-4" />
                     {item.label}
                   </Link>
