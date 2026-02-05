@@ -1,17 +1,17 @@
- import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
  import { supabase } from "@/integrations/supabase/client";
  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
- import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
  import { Button } from "@/components/ui/button";
  import { Badge } from "@/components/ui/badge";
  import { Skeleton } from "@/components/ui/skeleton";
  import { Input } from "@/components/ui/input";
  import { Label } from "@/components/ui/label";
- import { Shield, Plus, Trash2, Loader2, Search, UserCheck, Settings2, RefreshCw, Save } from "lucide-react";
+import { Shield, Plus, Trash2, Loader2, Search, UserCheck, Settings2, RefreshCw, Save, Edit2 } from "lucide-react";
  import { toast } from "sonner";
  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
  import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
  
  interface Subadmin {
    id: string;
@@ -210,6 +210,11 @@
  
    const subadminsOnly = subadmins.filter(s => s.role === "subadmin");
  
+  const selectedSubadminProfile = useMemo(() => {
+    if (!selectedSubadminForPermissions) return null;
+    return selectedSubadminForPermissions.profile;
+  }, [selectedSubadminForPermissions]);
+
    return (
      <div className="space-y-6">
        <div className="flex items-center justify-between">
@@ -239,7 +244,17 @@
                  if (subadmin) handleSelectSubadminForPermissions(subadmin);
                }}
              >
-               <SelectTrigger><SelectValue placeholder="Choose a subadmin to manage permissions" /></SelectTrigger>
+              <SelectTrigger className="w-full">
+                {selectedSubadminProfile ? (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{selectedSubadminProfile.username}</span>
+                    <span className="text-muted-foreground">({selectedSubadminProfile.email})</span>
+                    <Badge variant="secondary">Subadmin</Badge>
+                  </div>
+                ) : (
+                  <SelectValue placeholder="Choose a subadmin to manage permissions" />
+                )}
+              </SelectTrigger>
                <SelectContent>
                  {subadminsOnly.map((subadmin) => (
                    <SelectItem key={subadmin.user_id} value={subadmin.user_id}>
@@ -253,34 +268,35 @@
                </SelectContent>
              </Select>
            </div>
-           
+          
            {selectedSubadminForPermissions && (
              <>
+              <Separator />
                <div className="space-y-4">
                  <div className="flex items-center justify-between">
-                   <Label>Tab Permissions</Label>
+                  <Label className="text-base font-semibold">Tab Permissions</Label>
                    <Button variant="ghost" size="sm" onClick={handleSelectAllPermissions}>
                      {selectedPermissions.length === AVAILABLE_PERMISSIONS.length ? "Deselect All" : "Select All"}
                    </Button>
                  </div>
-                 
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-muted/30">
                    {AVAILABLE_PERMISSIONS.map((permission) => (
-                     <div key={permission.key} className="flex items-center space-x-2">
+                    <div key={permission.key} className="flex items-center space-x-3">
                        <Checkbox
                          id={permission.key}
                          checked={selectedPermissions.includes(permission.key)}
                          onCheckedChange={() => handleTogglePermission(permission.key)}
                        />
-                       <Label htmlFor={permission.key} className="cursor-pointer font-normal">{permission.label}</Label>
+                      <Label htmlFor={permission.key} className="cursor-pointer font-normal text-sm">{permission.label}</Label>
                      </div>
                    ))}
                  </div>
                  
-                 <p className="text-sm text-muted-foreground">{selectedPermissions.length} of {AVAILABLE_PERMISSIONS.length} tabs selected</p>
+                <p className="text-sm text-primary font-medium">{selectedPermissions.length} of {AVAILABLE_PERMISSIONS.length} tabs selected</p>
                </div>
                
-               <Button className="w-full" onClick={handleSavePermissions} disabled={isSavingPermissions}>
+              <Button className="w-full bg-primary hover:bg-primary/90" onClick={handleSavePermissions} disabled={isSavingPermissions}>
                  {isSavingPermissions ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                  Update Permissions
                </Button>
@@ -290,64 +306,80 @@
        </Card>
  
        {/* Existing Subadmins List */}
-       <Card>
-         <CardHeader>
-           <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5" />Existing Subadmins ({subadmins.length})</CardTitle>
-         </CardHeader>
-         <CardContent>
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-xl font-semibold">Existing Subadmins ({subadminsOnly.length})</h2>
+          <p className="text-sm text-muted-foreground">List of all users with subadmin permissions</p>
+        </div>
+        
+        <div className="space-y-4">
            {isLoading ? (
-             <div className="space-y-3">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
-           ) : subadmins.length === 0 ? (
-             <div className="text-center py-12 text-muted-foreground">
-               <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" /><p>No subadmins found</p>
-             </div>
-           ) : (
-             <Table>
-               <TableHeader>
-                 <TableRow>
-                   <TableHead>Username</TableHead>
-                   <TableHead>Email</TableHead>
-                   <TableHead>Role</TableHead>
-                   <TableHead>Permissions</TableHead>
-                   <TableHead>Created</TableHead>
-                   <TableHead>Actions</TableHead>
-                 </TableRow>
-               </TableHeader>
-               <TableBody>
-                 {subadmins.map((subadmin) => (
-                   <TableRow key={subadmin.id}>
-                     <TableCell className="font-medium">{subadmin.profile?.username || "Unknown"}</TableCell>
-                     <TableCell>{subadmin.profile?.email || "-"}</TableCell>
-                     <TableCell><Badge variant={subadmin.role === "admin" ? "default" : "secondary"}>{subadmin.role}</Badge></TableCell>
-                     <TableCell>
-                       {subadmin.role === "admin" ? (
-                         <span className="text-muted-foreground">All permissions</span>
-                       ) : (
-                         <span className="text-sm">{subadmin.permissions?.length || 0} tabs</span>
-                       )}
-                     </TableCell>
-                     <TableCell>{new Date(subadmin.created_at).toLocaleDateString()}</TableCell>
-                     <TableCell>
-                       <div className="flex gap-1">
-                         {subadmin.role === "subadmin" && (
-                           <Button size="sm" variant="ghost" onClick={() => handleSelectSubadminForPermissions(subadmin)}>
-                             <Settings2 className="h-4 w-4" />
-                           </Button>
-                         )}
-                         {subadmin.role !== "admin" && (
-                           <Button size="sm" variant="ghost" onClick={() => handleRemoveRole(subadmin.id, subadmin.role, subadmin.user_id)}>
-                             <Trash2 className="h-4 w-4 text-destructive" />
-                           </Button>
-                         )}
-                       </div>
-                     </TableCell>
-                   </TableRow>
-                 ))}
-               </TableBody>
-             </Table>
-           )}
-         </CardContent>
-       </Card>
+            <div className="space-y-3">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}</div>
+          ) : subadminsOnly.length === 0 ? (
+            <Card>
+              <CardContent className="py-12">
+                <div className="text-center text-muted-foreground">
+                  <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>No subadmins found</p>
+                  <p className="text-sm mt-1">Add a subadmin to get started</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            subadminsOnly.map((subadmin) => (
+              <Card key={subadmin.id}>
+                <CardContent className="py-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-lg">{subadmin.profile?.username || "Unknown"}</span>
+                        <Badge variant="secondary">Subadmin</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{subadmin.profile?.email || "-"}</p>
+                      
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Allowed Tabs:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(subadmin.permissions && subadmin.permissions.length > 0) ? (
+                            subadmin.permissions.map((perm) => {
+                              const permLabel = AVAILABLE_PERMISSIONS.find(p => p.key === perm)?.label || perm;
+                              return (
+                                <Badge key={perm} variant="outline" className="text-xs">
+                                  {permLabel}
+                                </Badge>
+                              );
+                            })
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No permissions assigned</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleSelectSubadminForPermissions(subadmin)}
+                      >
+                        <Edit2 className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => handleRemoveRole(subadmin.id, subadmin.role, subadmin.user_id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
  
        {/* Add Subadmin Dialog */}
        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
