@@ -209,6 +209,7 @@ import { Separator } from "@/components/ui/separator";
    );
  
    const subadminsOnly = subadmins.filter(s => s.role === "subadmin");
+  const adminsOnly = subadmins.filter(s => s.role === "admin");
  
   const selectedSubadminProfile = useMemo(() => {
     if (!selectedSubadminForPermissions) return null;
@@ -308,14 +309,14 @@ import { Separator } from "@/components/ui/separator";
        {/* Existing Subadmins List */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-xl font-semibold">Existing Subadmins ({subadminsOnly.length})</h2>
+          <h2 className="text-xl font-semibold">Existing Subadmins ({subadminsOnly.length + adminsOnly.length})</h2>
           <p className="text-sm text-muted-foreground">List of all users with subadmin permissions</p>
         </div>
         
         <div className="space-y-4">
            {isLoading ? (
             <div className="space-y-3">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}</div>
-          ) : subadminsOnly.length === 0 ? (
+          ) : (subadminsOnly.length === 0 && adminsOnly.length === 0) ? (
             <Card>
               <CardContent className="py-12">
                 <div className="text-center text-muted-foreground">
@@ -326,57 +327,86 @@ import { Separator } from "@/components/ui/separator";
               </CardContent>
             </Card>
           ) : (
-            subadminsOnly.map((subadmin) => (
-              <Card key={subadmin.id}>
-                <CardContent className="py-4">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-lg">{subadmin.profile?.username || "Unknown"}</span>
-                        <Badge variant="secondary">Subadmin</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{subadmin.profile?.email || "-"}</p>
-                      
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium">Allowed Tabs:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {(subadmin.permissions && subadmin.permissions.length > 0) ? (
-                            subadmin.permissions.map((perm) => {
-                              const permLabel = AVAILABLE_PERMISSIONS.find(p => p.key === perm)?.label || perm;
-                              return (
-                                <Badge key={perm} variant="outline" className="text-xs">
-                                  {permLabel}
-                                </Badge>
-                              );
-                            })
-                          ) : (
-                            <span className="text-sm text-muted-foreground">No permissions assigned</span>
-                          )}
+            <>
+              {/* Show Admins first */}
+              {adminsOnly.map((admin) => (
+                <Card key={admin.id} className="border-primary/30">
+                  <CardContent className="py-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-lg">{admin.profile?.username || "Unknown"}</span>
+                          <Badge variant="default">Admin</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{admin.profile?.email || "-"}</p>
+                        
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Allowed Tabs:</p>
+                          <span className="text-sm text-muted-foreground">All permissions (Admin)</span>
                         </div>
                       </div>
+                      
+                      <div className="flex gap-2">
+                        <Badge variant="outline" className="text-muted-foreground">Protected</Badge>
+                      </div>
                     </div>
-                    
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleSelectSubadminForPermissions(subadmin)}
-                      >
-                        <Edit2 className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button 
-                        variant="destructive" 
-                        size="sm"
-                        onClick={() => handleRemoveRole(subadmin.id, subadmin.role, subadmin.user_id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {/* Show Subadmins */}
+              {subadminsOnly.map((subadmin) => (
+                <Card key={subadmin.id}>
+                  <CardContent className="py-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-lg">{subadmin.profile?.username || "Unknown"}</span>
+                          <Badge variant="secondary">Subadmin</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{subadmin.profile?.email || "-"}</p>
+                        
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Allowed Tabs:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {(subadmin.permissions && subadmin.permissions.length > 0) ? (
+                              subadmin.permissions.map((perm) => {
+                                const permLabel = AVAILABLE_PERMISSIONS.find(p => p.key === perm)?.label || perm;
+                                return (
+                                  <Badge key={perm} variant="outline" className="text-xs">
+                                    {permLabel}
+                                  </Badge>
+                                );
+                              })
+                            ) : (
+                              <span className="text-sm text-muted-foreground">No permissions assigned</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleSelectSubadminForPermissions(subadmin)}
+                        >
+                          <Edit2 className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => handleRemoveRole(subadmin.id, subadmin.role, subadmin.user_id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              ))}
+            </>
           )}
         </div>
       </div>
