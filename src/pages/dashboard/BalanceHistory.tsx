@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { History, TrendingUp, TrendingDown } from "lucide-react";
+ import { History, TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
+ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
 interface EarningHistory {
@@ -29,6 +30,8 @@ export default function BalanceHistory() {
   }, [profile?.id]);
 
   const fetchHistory = async () => {
+     if (!profile?.id) return;
+     setIsLoading(true);
     const { data, error } = await supabase
       .from("earning_history")
       .select("*")
@@ -64,10 +67,15 @@ export default function BalanceHistory() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" />
-            Transaction History
-          </CardTitle>
+           <CardTitle className="flex items-center justify-between">
+             <div className="flex items-center gap-2">
+               <History className="h-5 w-5" />
+               Transaction History
+             </div>
+             <Button variant="outline" size="sm" onClick={fetchHistory} disabled={isLoading}>
+               <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+             </Button>
+           </CardTitle>
           <CardDescription>Your complete earning and spending log</CardDescription>
         </CardHeader>
         <CardContent>

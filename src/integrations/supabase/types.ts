@@ -1124,6 +1124,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      convert_cash_to_points: {
+        Args: { p_cash: number; p_user_id: string }
+        Returns: boolean
+      }
+      convert_points_to_cash: {
+        Args: { p_points: number; p_user_id: string }
+        Returns: boolean
+      }
       get_profile_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -1134,6 +1142,15 @@ export type Database = {
       }
       is_conversation_participant: {
         Args: { _conversation_id: string; _profile_id: string }
+        Returns: boolean
+      }
+      redeem_promocode: {
+        Args: {
+          p_code: string
+          p_promocode_id: string
+          p_reward: number
+          p_user_id: string
+        }
         Returns: boolean
       }
     }

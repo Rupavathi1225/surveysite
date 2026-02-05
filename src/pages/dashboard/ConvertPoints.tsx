@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeftRight, ArrowRight, Coins, Wallet } from "lucide-react";
+ import { ArrowLeftRight, ArrowRight, Coins, Wallet, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -12,14 +13,15 @@ const POINTS_TO_CASH_RATE = 0.01; // 1 point = $0.01
 const CASH_TO_POINTS_RATE = 100; // $1 = 100 points
 
 export default function ConvertPoints() {
-  const { profile } = useAuth();
+   const { profile, refreshProfile } = useAuth();
   const [pointsAmount, setPointsAmount] = useState("");
   const [cashAmount, setCashAmount] = useState("");
+   const [isConverting, setIsConverting] = useState(false);
 
   const pointsToCash = parseFloat(pointsAmount) * POINTS_TO_CASH_RATE || 0;
   const cashToPoints = parseFloat(cashAmount) * CASH_TO_POINTS_RATE || 0;
 
-  const handlePointsToCash = () => {
+   const handlePointsToCash = async () => {
     const points = parseInt(pointsAmount);
     if (isNaN(points) || points <= 0) {
       toast.error("Enter a valid amount");
@@ -29,11 +31,27 @@ export default function ConvertPoints() {
       toast.error("Insufficient points");
       return;
     }
-    toast.success(`Converted ${points} points to $${pointsToCash.toFixed(2)}`);
-    setPointsAmount("");
+
+     setIsConverting(true);
+     
+     const { data, error } = await supabase.rpc("convert_points_to_cash", {
+       p_user_id: profile?.id,
+       p_points: points,
+     });
+
+     if (error || data === false) {
+       toast.error("Failed to convert points");
+       setIsConverting(false);
+       return;
+     }
+
+     toast.success(`Converted ${points} points to $${pointsToCash.toFixed(2)}`);
+     setPointsAmount("");
+     await refreshProfile();
+     setIsConverting(false);
   };
 
-  const handleCashToPoints = () => {
+   const handleCashToPoints = async () => {
     const cash = parseFloat(cashAmount);
     if (isNaN(cash) || cash <= 0) {
       toast.error("Enter a valid amount");
@@ -43,8 +61,24 @@ export default function ConvertPoints() {
       toast.error("Insufficient balance");
       return;
     }
-    toast.success(`Converted $${cash.toFixed(2)} to ${cashToPoints} points`);
-    setCashAmount("");
+
+     setIsConverting(true);
+
+     const { data, error } = await supabase.rpc("convert_cash_to_points", {
+       p_user_id: profile?.id,
+       p_cash: cash,
+     });
+
+     if (error || data === false) {
+       toast.error("Failed to convert cash");
+       setIsConverting(false);
+       return;
+     }
+
+     toast.success(`Converted $${cash.toFixed(2)} to ${cashToPoints} points`);
+     setCashAmount("");
+     await refreshProfile();
+     setIsConverting(false);
   };
 
   return (
@@ -134,7 +168,10 @@ export default function ConvertPoints() {
                 </div>
               </div>
               <Button onClick={handlePointsToCash} className="w-full">
-                Convert to Cash
+                 {isConverting ? (
+                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                 ) : null}
+                 Convert to Cash
               </Button>
             </TabsContent>
             <TabsContent value="cash-to-points" className="space-y-4 mt-4">
@@ -158,7 +195,10 @@ export default function ConvertPoints() {
                 </div>
               </div>
               <Button onClick={handleCashToPoints} className="w-full">
-                Convert to Points
+                 {isConverting ? (
+                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                 ) : null}
+                 Convert to Points
               </Button>
             </TabsContent>
           </Tabs>
