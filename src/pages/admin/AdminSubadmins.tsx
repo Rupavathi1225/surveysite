@@ -35,26 +35,27 @@ import { Separator } from "@/components/ui/separator";
  }
  
  const AVAILABLE_PERMISSIONS = [
-   { key: "offers_management", label: "Offers Management" },
-   { key: "promo_codes", label: "Promo Codes" },
-   { key: "bonus_management", label: "Bonus Management" },
-   { key: "offer_access_requests", label: "Offer Access Requests" },
-   { key: "placement_approval", label: "Placement Approval" },
-   { key: "offerwall_analytics", label: "Offerwall Analytics" },
-   { key: "comprehensive_analytics", label: "Comprehensive Analytics" },
-   { key: "click_tracking", label: "Click Tracking" },
+   // Main Menu
+   { key: "dashboard", label: "Dashboard" },
+   { key: "survey_providers", label: "Survey Providers" },
+   { key: "single_link_providers", label: "Single Link Providers" },
+   { key: "survey_links", label: "Survey Links" },
+   { key: "contests", label: "Contests" },
+   { key: "earning_history", label: "Earning History" },
+   { key: "withdrawals", label: "Withdrawals" },
+   { key: "users", label: "Users" },
+   // Monitoring
    { key: "login_logs", label: "Login Logs" },
-   { key: "active_users", label: "Active Users" },
-   { key: "fraud_management", label: "Fraud Management" },
-   { key: "analytics", label: "Analytics" },
-   { key: "reports", label: "Reports" },
-   { key: "tracking", label: "Tracking" },
-   { key: "test_tracking", label: "Test Tracking" },
-   { key: "partners", label: "Partners" },
-   { key: "postback_logs", label: "Postback Logs" },
-   { key: "postback_receiver", label: "Postback Receiver" },
-   { key: "publishers", label: "Publishers" },
-   { key: "subadmin_management", label: "Subadmin Management" },
+   { key: "notifications", label: "Notifications" },
+   { key: "user_chats", label: "User Chats" },
+   { key: "subadmins", label: "Subadmins" },
+   // Masters
+   { key: "news", label: "News" },
+   { key: "promocodes", label: "Promocodes" },
+   { key: "pages", label: "Pages" },
+   { key: "payment_methods", label: "Payment Methods" },
+   // Settings
+   { key: "website_settings", label: "Website Settings" },
  ];
  
  export default function AdminSubadmins() {
