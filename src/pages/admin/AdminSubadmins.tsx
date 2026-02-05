@@ -164,6 +164,36 @@ import { Separator } from "@/components/ui/separator";
      setSelectedSubadminForPermissions(subadmin);
      setSelectedPermissions(subadmin.permissions || []);
    };
+
+  const handleSelectUserForPermissions = (userId: string) => {
+    // Check if user is already a subadmin
+    const existingSubadmin = subadminsOnly.find(s => s.user_id === userId);
+    if (existingSubadmin) {
+      handleSelectSubadminForPermissions(existingSubadmin);
+      return;
+    }
+    
+    // Find user from all users list
+    const user = allUsers.find(u => u.user_id === userId);
+    if (user) {
+      // Create a temporary subadmin object for this user
+      const tempSubadmin: Subadmin = {
+        id: "",
+        user_id: userId,
+        role: "subadmin",
+        created_at: new Date().toISOString(),
+        profile: {
+          username: user.username,
+          email: user.email,
+          first_name: null,
+          last_name: null,
+        },
+        permissions: [],
+      };
+      setSelectedSubadminForPermissions(tempSubadmin);
+      setSelectedPermissions([]);
+    }
+  };
  
    const handleTogglePermission = (permissionKey: string) => {
      setSelectedPermissions(prev => 
@@ -183,6 +213,21 @@ import { Separator } from "@/components/ui/separator";
      if (!selectedSubadminForPermissions) return;
      setIsSavingPermissions(true);
      
+    // Check if user is already a subadmin, if not, add them first
+    const existingSubadmin = subadminsOnly.find(s => s.user_id === selectedSubadminForPermissions.user_id);
+    if (!existingSubadmin) {
+      // Add subadmin role first
+      const { error: roleError } = await supabase.from("user_roles").insert({
+        user_id: selectedSubadminForPermissions.user_id,
+        role: "subadmin"
+      });
+      if (roleError) {
+        toast.error("Failed to add subadmin role");
+        setIsSavingPermissions(false);
+        return;
+      }
+    }
+    
      await supabase.from("subadmin_permissions").delete().eq("user_id", selectedSubadminForPermissions.user_id);
      
      if (selectedPermissions.length > 0) {
@@ -240,32 +285,42 @@ import { Separator } from "@/components/ui/separator";
              <Label>Select User</Label>
              <Select 
                value={selectedSubadminForPermissions?.user_id || ""} 
-               onValueChange={(userId) => {
-                 const subadmin = subadminsOnly.find(s => s.user_id === userId);
-                 if (subadmin) handleSelectSubadminForPermissions(subadmin);
-               }}
+                onValueChange={handleSelectUserForPermissions}
              >
               <SelectTrigger className="w-full">
                 {selectedSubadminProfile ? (
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{selectedSubadminProfile.username}</span>
                     <span className="text-muted-foreground">({selectedSubadminProfile.email})</span>
-                    <Badge variant="secondary">Subadmin</Badge>
+                     {subadminsOnly.find(s => s.user_id === selectedSubadminForPermissions?.user_id) ? (
+                       <Badge variant="secondary">Subadmin</Badge>
+                     ) : (
+                       <Badge variant="outline">User</Badge>
+                     )}
                   </div>
                 ) : (
-                  <SelectValue placeholder="Choose a subadmin to manage permissions" />
+                   <SelectValue placeholder="Choose a user to manage permissions" />
                 )}
               </SelectTrigger>
                <SelectContent>
-                 {subadminsOnly.map((subadmin) => (
-                   <SelectItem key={subadmin.user_id} value={subadmin.user_id}>
+                  {allUsers.map((user) => {
+                    const isSubadmin = subadminsOnly.find(s => s.user_id === user.user_id);
+                    const isAdmin = adminsOnly.find(s => s.user_id === user.user_id);
+                    if (isAdmin) return null; // Don't show admins in dropdown
+                    return (
+                    <SelectItem key={user.user_id} value={user.user_id}>
                      <div className="flex items-center gap-2">
-                       <span>{subadmin.profile?.username || "Unknown"}</span>
-                       <span className="text-muted-foreground">({subadmin.profile?.email})</span>
-                       <Badge variant="secondary">Subadmin</Badge>
+                        <span>{user.username}</span>
+                        <span className="text-muted-foreground">({user.email})</span>
+                        {isSubadmin ? (
+                          <Badge variant="secondary">Subadmin</Badge>
+                        ) : (
+                          <Badge variant="outline">User</Badge>
+                        )}
                      </div>
                    </SelectItem>
-                 ))}
+                    );
+                  })}
                </SelectContent>
              </Select>
            </div>
