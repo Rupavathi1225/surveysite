@@ -9,9 +9,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, User, Settings, LogOut, Shield } from "lucide-react";
+import { User, Settings, LogOut, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import NotificationBell from "./NotificationBell";
 
 export default function DashboardHeader() {
   const { profile, signOut, isAdmin } = useAuth();
@@ -42,12 +43,7 @@ export default function DashboardHeader() {
           </div>
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 bg-accent text-accent-foreground text-xs rounded-full flex items-center justify-center">
-              3
-            </span>
-          </Button>
+          <NotificationBell />
 
           {/* User Menu */}
           <DropdownMenu>
