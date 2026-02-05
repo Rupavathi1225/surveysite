@@ -105,32 +105,20 @@ export default function Promocode() {
       return;
     }
 
-     // Record promocode use
-     const { error: useError } = await supabase.from("promocode_uses").insert({
-      user_id: profile.id,
-      promocode_id: promocode.id,
+    // Use RPC function to update points, earning history, and promocode usage
+    const { data: redeemResult, error: redeemError } = await supabase.rpc("redeem_promocode", {
+      p_user_id: profile.id,
+      p_promocode_id: promocode.id,
+      p_reward: promocode.reward,
+      p_code: promocode.code,
     });
 
-    if (useError) {
+    if (redeemError) {
+      console.error("Redeem error:", redeemError);
       toast.error("Failed to redeem promocode");
       setIsLoading(false);
       return;
     }
-
-     // Use RPC function to update points, earning history, and promocode usage
-     const { error: redeemError } = await supabase.rpc("redeem_promocode", {
-       p_user_id: profile.id,
-       p_promocode_id: promocode.id,
-       p_reward: promocode.reward,
-       p_code: promocode.code,
-     });
-
-     if (redeemError) {
-       console.error("Redeem error:", redeemError);
-       toast.error("Failed to redeem promocode");
-       setIsLoading(false);
-       return;
-     }
 
     toast.success(`Congratulations! You earned ${promocode.reward} points!`);
     setCode("");
