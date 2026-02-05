@@ -8,10 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Plus, Edit, Trash2, Loader2, Search, UserPlus } from "lucide-react";
+import { Users, Plus, Edit, Trash2, Loader2, Search, UserPlus, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import UserBalanceDialog from "@/components/admin/UserBalanceDialog";
 
 interface User {
   id: string;
@@ -37,6 +38,8 @@ export default function AdminUsers() {
   const [isSaving, setIsSaving] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isBalanceDialogOpen, setIsBalanceDialogOpen] = useState(false);
+  const [balanceUser, setBalanceUser] = useState<User | null>(null);
   
   const [formData, setFormData] = useState({
     first_name: "",
@@ -56,6 +59,7 @@ export default function AdminUsers() {
     mobile: "",
     country: "India",
     status: "active",
+    role: "user" as "user" | "admin" | "subadmin",
   });
 
   const [bulkFormData, setBulkFormData] = useState({
@@ -228,9 +232,17 @@ export default function AdminUsers() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => handleEdit(user)}>
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => handleEdit(user)} title="Edit User">
                           <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => { setBalanceUser(user); setIsBalanceDialogOpen(true); }} 
+                          title="Manage Balance"
+                        >
+                          <Wallet className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => handleDelete(user.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
@@ -395,6 +407,22 @@ export default function AdminUsers() {
                   />
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select
+                  value={addFormData.role}
+                  onValueChange={(value: "user" | "admin" | "subadmin") => setAddFormData({ ...addFormData, role: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="subadmin">Sub Admin</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <p className="text-sm text-muted-foreground">
                 Note: User creation requires Supabase Auth. Users will need to sign up through the registration page.
               </p>
@@ -451,6 +479,14 @@ export default function AdminUsers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Balance Management Dialog */}
+      <UserBalanceDialog
+        open={isBalanceDialogOpen}
+        onOpenChange={setIsBalanceDialogOpen}
+        user={balanceUser}
+        onSuccess={fetchUsers}
+      />
     </div>
   );
 }
