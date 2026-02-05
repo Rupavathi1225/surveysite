@@ -292,28 +292,61 @@ export type Database = {
       }
       login_logs: {
         Row: {
+          browser: string | null
+          device_fingerprint: string | null
+          device_type: string | null
           email: string
           id: string
           ip_address: string | null
+          is_new_device: boolean | null
+          isp: string | null
+          location_city: string | null
+          location_country: string | null
+          location_region: string | null
           login_at: string
+          login_method: string | null
+          os: string | null
+          risk_score: number | null
           status: string
           user_agent: string | null
           user_id: string
         }
         Insert: {
+          browser?: string | null
+          device_fingerprint?: string | null
+          device_type?: string | null
           email: string
           id?: string
           ip_address?: string | null
+          is_new_device?: boolean | null
+          isp?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_region?: string | null
           login_at?: string
+          login_method?: string | null
+          os?: string | null
+          risk_score?: number | null
           status?: string
           user_agent?: string | null
           user_id: string
         }
         Update: {
+          browser?: string | null
+          device_fingerprint?: string | null
+          device_type?: string | null
           email?: string
           id?: string
           ip_address?: string | null
+          is_new_device?: boolean | null
+          isp?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_region?: string | null
           login_at?: string
+          login_method?: string | null
+          os?: string | null
+          risk_score?: number | null
           status?: string
           user_agent?: string | null
           user_id?: string
@@ -454,6 +487,41 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_visits: {
+        Row: {
+          id: string
+          login_log_id: string | null
+          page_path: string
+          page_title: string | null
+          user_id: string
+          visited_at: string
+        }
+        Insert: {
+          id?: string
+          login_log_id?: string | null
+          page_path: string
+          page_title?: string | null
+          user_id: string
+          visited_at?: string
+        }
+        Update: {
+          id?: string
+          login_log_id?: string | null
+          page_path?: string
+          page_title?: string | null
+          user_id?: string
+          visited_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_visits_login_log_id_fkey"
+            columns: ["login_log_id"]
+            isOneToOne: false
+            referencedRelation: "login_logs"
             referencedColumns: ["id"]
           },
         ]
@@ -645,34 +713,70 @@ export type Database = {
       }
       promocodes: {
         Row: {
+          auto_deactivate: boolean | null
+          bonus_type: string | null
           code: string
           created_at: string
+          credit_amount: number | null
           current_uses: number | null
+          description: string | null
+          end_time: string | null
           expires_at: string | null
           id: string
+          is_gift_card: boolean | null
           max_uses: number | null
+          max_uses_per_user: number | null
+          name: string | null
           reward: number
+          start_date: string | null
+          start_time: string | null
           status: string | null
+          time_based_validity: boolean | null
+          timezone: string | null
         }
         Insert: {
+          auto_deactivate?: boolean | null
+          bonus_type?: string | null
           code: string
           created_at?: string
+          credit_amount?: number | null
           current_uses?: number | null
+          description?: string | null
+          end_time?: string | null
           expires_at?: string | null
           id?: string
+          is_gift_card?: boolean | null
           max_uses?: number | null
+          max_uses_per_user?: number | null
+          name?: string | null
           reward: number
+          start_date?: string | null
+          start_time?: string | null
           status?: string | null
+          time_based_validity?: boolean | null
+          timezone?: string | null
         }
         Update: {
+          auto_deactivate?: boolean | null
+          bonus_type?: string | null
           code?: string
           created_at?: string
+          credit_amount?: number | null
           current_uses?: number | null
+          description?: string | null
+          end_time?: string | null
           expires_at?: string | null
           id?: string
+          is_gift_card?: boolean | null
           max_uses?: number | null
+          max_uses_per_user?: number | null
+          name?: string | null
           reward?: number
+          start_date?: string | null
+          start_time?: string | null
           status?: string | null
+          time_based_validity?: boolean | null
+          timezone?: string | null
         }
         Relationships: []
       }
@@ -697,6 +801,27 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: string | null
+        }
+        Relationships: []
+      }
+      subadmin_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission_key: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_key: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_key?: string
+          user_id?: string
         }
         Relationships: []
       }
