@@ -117,6 +117,34 @@ export default function Promocode() {
       return;
     }
 
+    // Update user's points balance
+    const newPoints = (profile.points_balance || 0) + promocode.reward;
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ points_balance: newPoints })
+      .eq("id", profile.id);
+
+    if (updateError) {
+      toast.error("Failed to update points");
+      setIsLoading(false);
+      return;
+    }
+
+    // Add earning history entry
+    await supabase.from("earning_history").insert({
+      user_id: profile.id,
+      type: "promocode",
+      amount: promocode.reward,
+      description: `Promocode ${promocode.code} redeemed`,
+      status: "approved",
+    });
+
+    // Increment promocode usage count
+    await supabase
+      .from("promocodes")
+      .update({ current_uses: (promocode.current_uses || 0) + 1 })
+      .eq("id", promocode.id);
+
     toast.success(`Congratulations! You earned ${promocode.reward} points!`);
     setCode("");
     await refreshProfile();
