@@ -1,0 +1,259 @@
+ import { useState, useEffect } from "react";
+ import { supabase } from "@/integrations/supabase/client";
+ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+ import { Badge } from "@/components/ui/badge";
+ import { Skeleton } from "@/components/ui/skeleton";
+ import { ScrollArea } from "@/components/ui/scroll-area";
+ import {
+   UserPlus,
+   CheckCircle,
+   Gift,
+   Flame,
+   Plus,
+   Coins,
+   Wallet,
+   CreditCard,
+   Activity,
+ } from "lucide-react";
+ 
+ interface ActivityItem {
+   id: string;
+   type: "signup" | "offer_completed" | "promocode_redeemed" | "promocode_added" | "offer_added" | "credits" | "payment_requested" | "payment_completed";
+   message: string;
+   timestamp: string;
+   icon: React.ReactNode;
+   color: string;
+ }
+ 
+ export default function LiveActivityFeed() {
+   const [activities, setActivities] = useState<ActivityItem[]>([]);
+   const [isLoading, setIsLoading] = useState(true);
+ 
+   useEffect(() => {
+     fetchActivities();
+   }, []);
+ 
+   const fetchActivities = async () => {
+     setIsLoading(true);
+     const allActivities: ActivityItem[] = [];
+ 
+     // 1. New User Signups (recent profiles)
+     const { data: newUsers } = await supabase
+       .from("profiles")
+       .select("id, username, first_name, created_at")
+       .order("created_at", { ascending: false })
+       .limit(5);
+ 
+     if (newUsers) {
+       newUsers.forEach((user) => {
+         allActivities.push({
+           id: `signup-${user.id}`,
+           type: "signup",
+           message: `🎉 New user ${user.first_name || user.username} just signed up`,
+           timestamp: user.created_at,
+           icon: <UserPlus className="h-4 w-4" />,
+           color: "text-green-500",
+         });
+       });
+     }
+ 
+     // 2. Offer Completed (earning history with provider/survey)
+     const { data: completedOffers } = await supabase
+       .from("earning_history")
+       .select(`
+         id, description, amount, created_at, user_id, type,
+         profiles!earning_history_user_id_fkey(username, first_name)
+       `)
+       .order("created_at", { ascending: false })
+       .limit(10);
+ 
+     if (completedOffers) {
+       completedOffers.forEach((offer: any) => {
+         const userName = offer.profiles?.first_name || offer.profiles?.username || "User";
+         if (offer.type === "survey" || offer.type === "offer") {
+           allActivities.push({
+             id: `offer-${offer.id}`,
+             type: "offer_completed",
+             message: `✅ User ${userName} completed ${offer.description}`,
+             timestamp: offer.created_at,
+             icon: <CheckCircle className="h-4 w-4" />,
+             color: "text-blue-500",
+           });
+         } else if (offer.type === "promocode") {
+           allActivities.push({
+             id: `promo-redeem-${offer.id}`,
+             type: "promocode_redeemed",
+             message: `🎁 ${offer.description} redeemed by ${userName}`,
+             timestamp: offer.created_at,
+             icon: <Gift className="h-4 w-4" />,
+             color: "text-purple-500",
+           });
+         } else if (offer.type === "referral") {
+           allActivities.push({
+             id: `referral-${offer.id}`,
+             type: "credits",
+             message: `💰 ${offer.amount} credits added to ${userName}'s account (Referral)`,
+             timestamp: offer.created_at,
+             icon: <Coins className="h-4 w-4" />,
+             color: "text-yellow-500",
+           });
+         } else {
+           allActivities.push({
+             id: `earning-${offer.id}`,
+             type: "credits",
+             message: `💰 ${offer.amount} points credited - ${offer.description}`,
+             timestamp: offer.created_at,
+             icon: <Coins className="h-4 w-4" />,
+             color: "text-yellow-500",
+           });
+         }
+       });
+     }
+ 
+     // 3. New Promocodes Added (recently created)
+     const { data: newPromocodes } = await supabase
+       .from("promocodes")
+       .select("id, code, name, created_at")
+       .order("created_at", { ascending: false })
+       .limit(5);
+ 
+     if (newPromocodes) {
+       newPromocodes.forEach((promo) => {
+         allActivities.push({
+           id: `promo-added-${promo.id}`,
+           type: "promocode_added",
+           message: `🔥 New promocode ${promo.code} is now live`,
+           timestamp: promo.created_at,
+           icon: <Flame className="h-4 w-4" />,
+           color: "text-orange-500",
+         });
+       });
+     }
+ 
+     // 4. New Offers Added (survey links)
+     const { data: newOffers } = await supabase
+       .from("survey_links")
+       .select("id, name, payout, created_at")
+       .order("created_at", { ascending: false })
+       .limit(5);
+ 
+     if (newOffers) {
+       newOffers.forEach((offer) => {
+         allActivities.push({
+           id: `offer-added-${offer.id}`,
+           type: "offer_added",
+           message: `🆕 New offer ${offer.name} – ${offer.payout} pts added`,
+           timestamp: offer.created_at,
+           icon: <Plus className="h-4 w-4" />,
+           color: "text-cyan-500",
+         });
+       });
+     }
+ 
+     // 5. Payment Requests and Completions
+     const { data: withdrawals } = await supabase
+       .from("withdrawals")
+       .select(`
+         id, amount, status, created_at, updated_at,
+         profiles!withdrawals_user_id_fkey(username, first_name)
+       `)
+       .order("created_at", { ascending: false })
+       .limit(10);
+ 
+     if (withdrawals) {
+       withdrawals.forEach((withdrawal: any) => {
+         const userName = withdrawal.profiles?.first_name || withdrawal.profiles?.username || "User";
+         
+         if (withdrawal.status === "pending") {
+           allActivities.push({
+             id: `payment-req-${withdrawal.id}`,
+             type: "payment_requested",
+             message: `💸 User ${userName} requested payment of ₹${withdrawal.amount}`,
+             timestamp: withdrawal.created_at,
+             icon: <Wallet className="h-4 w-4" />,
+             color: "text-amber-500",
+           });
+         } else if (withdrawal.status === "success") {
+           allActivities.push({
+             id: `payment-done-${withdrawal.id}`,
+             type: "payment_completed",
+             message: `✅ Payment of ₹${withdrawal.amount} successfully sent to ${userName}`,
+             timestamp: withdrawal.updated_at,
+             icon: <CreditCard className="h-4 w-4" />,
+             color: "text-green-500",
+           });
+         }
+       });
+     }
+ 
+     // Sort all activities by timestamp (newest first)
+     allActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+ 
+     // Take the most recent 15 activities
+     setActivities(allActivities.slice(0, 15));
+     setIsLoading(false);
+   };
+ 
+   const formatTime = (timestamp: string) => {
+     const date = new Date(timestamp);
+     const now = new Date();
+     const diffMs = now.getTime() - date.getTime();
+     const diffMins = Math.floor(diffMs / 60000);
+     const diffHours = Math.floor(diffMs / 3600000);
+     const diffDays = Math.floor(diffMs / 86400000);
+ 
+     if (diffMins < 1) return "Just now";
+     if (diffMins < 60) return `${diffMins}m ago`;
+     if (diffHours < 24) return `${diffHours}h ago`;
+     if (diffDays < 7) return `${diffDays}d ago`;
+     return date.toLocaleDateString();
+   };
+ 
+   return (
+     <Card>
+       <CardHeader>
+         <CardTitle className="flex items-center gap-2">
+           <Activity className="h-5 w-5 text-primary" />
+           Live Activity Feed
+         </CardTitle>
+         <CardDescription>Real-time platform activity</CardDescription>
+       </CardHeader>
+       <CardContent>
+         {isLoading ? (
+           <div className="space-y-3">
+             {[...Array(5)].map((_, i) => (
+               <Skeleton key={i} className="h-12" />
+             ))}
+           </div>
+         ) : activities.length === 0 ? (
+           <div className="text-center py-8 text-muted-foreground">
+             <Activity className="h-12 w-12 mx-auto mb-3 opacity-50" />
+             <p>No recent activity</p>
+             <p className="text-sm">Activity will appear here as it happens</p>
+           </div>
+         ) : (
+           <ScrollArea className="h-[350px] pr-4">
+             <div className="space-y-3">
+               {activities.map((activity) => (
+                 <div
+                   key={activity.id}
+                   className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                 >
+                   <div className={`mt-0.5 ${activity.color}`}>
+                     {activity.icon}
+                   </div>
+                   <div className="flex-1 min-w-0">
+                     <p className="text-sm leading-relaxed">{activity.message}</p>
+                     <p className="text-xs text-muted-foreground mt-1">
+                       {formatTime(activity.timestamp)}
+                     </p>
+                   </div>
+                 </div>
+               ))}
+             </div>
+           </ScrollArea>
+         )}
+       </CardContent>
+     </Card>
+   );
+ }

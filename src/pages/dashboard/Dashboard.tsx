@@ -18,12 +18,12 @@ import {
   Star,
   Zap,
   Gift,
-  ArrowRight,
   CheckCircle,
   Clock,
   ClipboardList,
   ArrowLeftRight,
 } from "lucide-react";
+ import LiveActivityFeed from "@/components/dashboard/LiveActivityFeed";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
@@ -49,7 +49,7 @@ interface EarningHistory {
   amount: number;
   created_at: string;
 }
-
+ // Note: recentEarnings state is kept for potential future use but activity feed now handles display
 export default function Dashboard() {
   const { profile } = useAuth();
   const [offerwalls, setOfferwalls] = useState<SurveyProvider[]>([]);
@@ -310,46 +310,7 @@ export default function Dashboard() {
       </div>
 
       {/* Last Credited */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Last Credited</CardTitle>
-          <CardDescription>Your recent earnings</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-12" />
-              ))}
-            </div>
-          ) : recentEarnings.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Coins className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>No recent credits</p>
-              <p className="text-sm">Complete surveys to start earning!</p>
-              <Link to="/dashboard/surveys">
-                <Button className="mt-4">
-                  Start Earning <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentEarnings.map((earning) => (
-                <div key={earning.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div>
-                    <p className="font-medium">{earning.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(earning.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Badge variant="outline" className="text-primary">+{earning.amount} pts</Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+       <LiveActivityFeed />
     </div>
   );
 }
