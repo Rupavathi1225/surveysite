@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Edit, Loader2, Globe, Mail, DollarSign, FileImage, MessageSquare } from "lucide-react";
+import { Settings, Edit, Loader2, Globe, Mail, DollarSign, FileImage } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,9 +33,6 @@ const DEFAULT_SETTINGS = [
   { key: "smtp_user", label: "SMTP User", type: "text", category: "email" },
   { key: "smtp_password", label: "SMTP Password", type: "password", category: "email" },
   { key: "smtp_from", label: "From Email", type: "email", category: "email" },
-  { key: "free_chat_messages", label: "Free Chat Messages", type: "number", category: "chat" },
-  { key: "chat_credit_cost", label: "Credits Per Message", type: "number", category: "chat" },
-  { key: "max_comments_per_day", label: "Max Comments Per Day", type: "number", category: "chat" },
 ];
 
 export default function AdminSettings() {
@@ -143,7 +140,7 @@ export default function AdminSettings() {
         <Skeleton className="h-96" />
       ) : (
         <Tabs defaultValue="general">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="general" className="flex items-center gap-2">
               <Globe className="h-4 w-4" />
               General
@@ -154,11 +151,7 @@ export default function AdminSettings() {
             </TabsTrigger>
             <TabsTrigger value="email" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              Email
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Chat Limits
+              Email (SMTP)
             </TabsTrigger>
           </TabsList>
 
@@ -234,32 +227,6 @@ export default function AdminSettings() {
                   </TableHeader>
                   <TableBody>
                     {DEFAULT_SETTINGS.filter((s) => s.category === "email").map(renderSettingRow)}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="chat">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Chat & Comment Limits
-                </CardTitle>
-                <CardDescription>Configure chat credits and spam limits</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Setting</TableHead>
-                      <TableHead>Value</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {DEFAULT_SETTINGS.filter((s) => s.category === "chat").map(renderSettingRow)}
                   </TableBody>
                 </Table>
               </CardContent>
