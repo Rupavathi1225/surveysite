@@ -8,11 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Plus, Edit, Trash2, Loader2, Search, UserPlus, Wallet } from "lucide-react";
+import { Users, Plus, Edit, Trash2, Loader2, Search, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import UserBalanceDialog from "@/components/admin/UserBalanceDialog";
 
 interface User {
   id: string;
@@ -38,8 +37,6 @@ export default function AdminUsers() {
   const [isSaving, setIsSaving] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isBalanceDialogOpen, setIsBalanceDialogOpen] = useState(false);
-  const [balanceUser, setBalanceUser] = useState<User | null>(null);
   
   const [formData, setFormData] = useState({
     first_name: "",
@@ -232,17 +229,9 @@ export default function AdminUsers() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => handleEdit(user)} title="Edit User">
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="ghost" onClick={() => handleEdit(user)}>
                           <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          onClick={() => { setBalanceUser(user); setIsBalanceDialogOpen(true); }} 
-                          title="Manage Balance"
-                        >
-                          <Wallet className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => handleDelete(user.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
@@ -479,14 +468,6 @@ export default function AdminUsers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Balance Management Dialog */}
-      <UserBalanceDialog
-        open={isBalanceDialogOpen}
-        onOpenChange={setIsBalanceDialogOpen}
-        user={balanceUser}
-        onSuccess={fetchUsers}
-      />
     </div>
   );
 }

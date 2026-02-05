@@ -14,39 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      admin_chats: {
-        Row: {
-          admin_id: string | null
-          created_at: string | null
-          credits_used: number | null
-          id: string
-          is_admin_reply: boolean | null
-          is_read: boolean | null
-          message: string
-          user_id: string
-        }
-        Insert: {
-          admin_id?: string | null
-          created_at?: string | null
-          credits_used?: number | null
-          id?: string
-          is_admin_reply?: boolean | null
-          is_read?: boolean | null
-          message: string
-          user_id: string
-        }
-        Update: {
-          admin_id?: string | null
-          created_at?: string | null
-          credits_used?: number | null
-          id?: string
-          is_admin_reply?: boolean | null
-          is_read?: boolean | null
-          message?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       contest_entries: {
         Row: {
           contest_id: string
@@ -89,61 +56,12 @@ export type Database = {
           },
         ]
       }
-      contest_notifications: {
-        Row: {
-          contest_id: string
-          created_at: string
-          id: string
-          notification_type: string | null
-          notified_at: string | null
-          points_earned: number | null
-          rank: number | null
-          user_id: string
-        }
-        Insert: {
-          contest_id: string
-          created_at?: string
-          id?: string
-          notification_type?: string | null
-          notified_at?: string | null
-          points_earned?: number | null
-          rank?: number | null
-          user_id: string
-        }
-        Update: {
-          contest_id?: string
-          created_at?: string
-          id?: string
-          notification_type?: string | null
-          notified_at?: string | null
-          points_earned?: number | null
-          rank?: number | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contest_notifications_contest_id_fkey"
-            columns: ["contest_id"]
-            isOneToOne: false
-            referencedRelation: "contests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contest_notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       contests: {
         Row: {
           amount: number
           created_at: string
           description: string | null
           end_date: string
-          excluded_users: string[] | null
           id: string
           start_date: string
           status: string | null
@@ -154,7 +72,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date: string
-          excluded_users?: string[] | null
           id?: string
           start_date: string
           status?: string | null
@@ -165,72 +82,12 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string
-          excluded_users?: string[] | null
           id?: string
           start_date?: string
           status?: string | null
           title?: string
         }
         Relationships: []
-      }
-      conversations: {
-        Row: {
-          created_at: string | null
-          id: string
-          last_message_at: string | null
-          participant_one: string
-          participant_two: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          last_message_at?: string | null
-          participant_one: string
-          participant_two: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          last_message_at?: string | null
-          participant_one?: string
-          participant_two?: string
-        }
-        Relationships: []
-      }
-      direct_messages: {
-        Row: {
-          content: string
-          conversation_id: string
-          created_at: string | null
-          id: string
-          is_read: boolean | null
-          sender_id: string
-        }
-        Insert: {
-          content: string
-          conversation_id: string
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          sender_id: string
-        }
-        Update: {
-          content?: string
-          conversation_id?: string
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          sender_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "direct_messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       earning_history: {
         Row: {
@@ -292,61 +149,28 @@ export type Database = {
       }
       login_logs: {
         Row: {
-          browser: string | null
-          device_fingerprint: string | null
-          device_type: string | null
           email: string
           id: string
           ip_address: string | null
-          is_new_device: boolean | null
-          isp: string | null
-          location_city: string | null
-          location_country: string | null
-          location_region: string | null
           login_at: string
-          login_method: string | null
-          os: string | null
-          risk_score: number | null
           status: string
           user_agent: string | null
           user_id: string
         }
         Insert: {
-          browser?: string | null
-          device_fingerprint?: string | null
-          device_type?: string | null
           email: string
           id?: string
           ip_address?: string | null
-          is_new_device?: boolean | null
-          isp?: string | null
-          location_city?: string | null
-          location_country?: string | null
-          location_region?: string | null
           login_at?: string
-          login_method?: string | null
-          os?: string | null
-          risk_score?: number | null
           status?: string
           user_agent?: string | null
           user_id: string
         }
         Update: {
-          browser?: string | null
-          device_fingerprint?: string | null
-          device_type?: string | null
           email?: string
           id?: string
           ip_address?: string | null
-          is_new_device?: boolean | null
-          isp?: string | null
-          location_city?: string | null
-          location_country?: string | null
-          location_region?: string | null
           login_at?: string
-          login_method?: string | null
-          os?: string | null
-          risk_score?: number | null
           status?: string
           user_agent?: string | null
           user_id?: string
@@ -415,41 +239,6 @@ export type Database = {
         }
         Relationships: []
       }
-      notification_comments: {
-        Row: {
-          comment: string
-          created_at: string | null
-          id: string
-          is_admin: boolean | null
-          notification_id: string
-          user_id: string
-        }
-        Insert: {
-          comment: string
-          created_at?: string | null
-          id?: string
-          is_admin?: boolean | null
-          notification_id: string
-          user_id: string
-        }
-        Update: {
-          comment?: string
-          created_at?: string | null
-          id?: string
-          is_admin?: boolean | null
-          notification_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_comments_notification_id_fkey"
-            columns: ["notification_id"]
-            isOneToOne: false
-            referencedRelation: "notifications"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       notifications: {
         Row: {
           created_at: string
@@ -487,41 +276,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      page_visits: {
-        Row: {
-          id: string
-          login_log_id: string | null
-          page_path: string
-          page_title: string | null
-          user_id: string
-          visited_at: string
-        }
-        Insert: {
-          id?: string
-          login_log_id?: string | null
-          page_path: string
-          page_title?: string | null
-          user_id: string
-          visited_at?: string
-        }
-        Update: {
-          id?: string
-          login_log_id?: string | null
-          page_path?: string
-          page_title?: string | null
-          user_id?: string
-          visited_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "page_visits_login_log_id_fkey"
-            columns: ["login_log_id"]
-            isOneToOne: false
-            referencedRelation: "login_logs"
             referencedColumns: ["id"]
           },
         ]
@@ -713,70 +467,34 @@ export type Database = {
       }
       promocodes: {
         Row: {
-          auto_deactivate: boolean | null
-          bonus_type: string | null
           code: string
           created_at: string
-          credit_amount: number | null
           current_uses: number | null
-          description: string | null
-          end_time: string | null
           expires_at: string | null
           id: string
-          is_gift_card: boolean | null
           max_uses: number | null
-          max_uses_per_user: number | null
-          name: string | null
           reward: number
-          start_date: string | null
-          start_time: string | null
           status: string | null
-          time_based_validity: boolean | null
-          timezone: string | null
         }
         Insert: {
-          auto_deactivate?: boolean | null
-          bonus_type?: string | null
           code: string
           created_at?: string
-          credit_amount?: number | null
           current_uses?: number | null
-          description?: string | null
-          end_time?: string | null
           expires_at?: string | null
           id?: string
-          is_gift_card?: boolean | null
           max_uses?: number | null
-          max_uses_per_user?: number | null
-          name?: string | null
           reward: number
-          start_date?: string | null
-          start_time?: string | null
           status?: string | null
-          time_based_validity?: boolean | null
-          timezone?: string | null
         }
         Update: {
-          auto_deactivate?: boolean | null
-          bonus_type?: string | null
           code?: string
           created_at?: string
-          credit_amount?: number | null
           current_uses?: number | null
-          description?: string | null
-          end_time?: string | null
           expires_at?: string | null
           id?: string
-          is_gift_card?: boolean | null
           max_uses?: number | null
-          max_uses_per_user?: number | null
-          name?: string | null
           reward?: number
-          start_date?: string | null
-          start_time?: string | null
           status?: string | null
-          time_based_validity?: boolean | null
-          timezone?: string | null
         }
         Relationships: []
       }
@@ -801,27 +519,6 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: string | null
-        }
-        Relationships: []
-      }
-      subadmin_permissions: {
-        Row: {
-          created_at: string
-          id: string
-          permission_key: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          permission_key: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          permission_key?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -1130,10 +827,6 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
-        Returns: boolean
-      }
-      is_conversation_participant: {
-        Args: { _conversation_id: string; _profile_id: string }
         Returns: boolean
       }
     }

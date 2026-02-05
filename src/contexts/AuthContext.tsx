@@ -2,105 +2,6 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-// Helper to parse user agent
-const parseUserAgent = (ua: string) => {
-  let browser = "Unknown";
-  let os = "Unknown";
-  let deviceType = "desktop";
-
-  // Detect browser
-  if (ua.includes("Firefox")) browser = "Firefox";
-  else if (ua.includes("Edg")) browser = "Edge";
-  else if (ua.includes("Chrome")) browser = "Chrome";
-  else if (ua.includes("Safari")) browser = "Safari";
-  else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera";
-
-  // Detect OS
-  if (ua.includes("Windows")) os = "Windows";
-  else if (ua.includes("Mac OS")) os = "macOS";
-  else if (ua.includes("Linux")) os = "Linux";
-  else if (ua.includes("Android")) os = "Android";
-  else if (ua.includes("iOS") || ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
-
-  // Detect device type
-  if (ua.includes("Mobile") || ua.includes("Android")) deviceType = "mobile";
-  else if (ua.includes("Tablet") || ua.includes("iPad")) deviceType = "tablet";
-
-  return { browser, os, deviceType };
-};
-
-// Generate device fingerprint
-const generateFingerprint = () => {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  if (ctx) {
-    ctx.textBaseline = "top";
-    ctx.font = "14px Arial";
-    ctx.fillText("fingerprint", 2, 2);
-  }
-  const canvasData = canvas.toDataURL();
-  
-  const data = [
-    navigator.userAgent,
-    navigator.language,
-    screen.width + "x" + screen.height,
-    new Date().getTimezoneOffset(),
-    canvasData.substring(0, 50)
-  ].join("|");
-  
-  // Simple hash
-  let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    const char = data.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(16).substring(0, 16);
-};
-
-// Fetch IP and geo data
-const fetchIpGeoData = async () => {
-  try {
-    // Try ipapi.co first (free, no key required)
-    const response = await fetch("https://ipapi.co/json/", { 
-      signal: AbortSignal.timeout(5000) 
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        ip: data.ip || null,
-        country: data.country_name || null,
-        region: data.region || null,
-        city: data.city || null,
-        isp: data.org || null,
-      };
-    }
-  } catch (error) {
-    console.warn("Primary IP API failed, trying fallback...");
-  }
-
-  try {
-    // Fallback to ip-api.com
-    const response = await fetch("http://ip-api.com/json/?fields=query,country,regionName,city,isp", {
-      signal: AbortSignal.timeout(5000)
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        ip: data.query || null,
-        country: data.country || null,
-        region: data.regionName || null,
-        city: data.city || null,
-        isp: data.isp || null,
-      };
-    }
-  } catch (error) {
-    console.warn("IP geolocation failed:", error);
-  }
-
-  return { ip: null, country: null, region: null, city: null, isp: null };
-};
-
 interface Profile {
   id: string;
   user_id: string;
@@ -238,30 +139,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Log the login attempt
     if (data.user) {
-      // Collect all login metadata
-      const userAgent = navigator.userAgent;
-      const { browser, os, deviceType } = parseUserAgent(userAgent);
-      const fingerprint = generateFingerprint();
-      
-      // Fetch IP and geo data asynchronously (don't block login)
-      fetchIpGeoData().then(async (geoData) => {
-        await supabase.from("login_logs").insert({
-          user_id: data.user.id,
-          email: data.user.email || email,
-          status: "success",
-          ip_address: geoData.ip,
-          location_country: geoData.country,
-          location_region: geoData.region,
-          location_city: geoData.city,
-          isp: geoData.isp,
-          browser,
-          os,
-          device_type: deviceType,
-          user_agent: userAgent,
-          device_fingerprint: fingerprint,
-          login_method: "PASSWORD",
-        });
-      }).catch(console.error);
+      await supabase.from("login_logs").insert({
+        user_id: data.user.id,
+        email: data.user.email || email,
+        status: "success",
+      });
     }
 
     return { error };

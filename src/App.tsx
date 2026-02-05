@@ -30,8 +30,6 @@ import Promocode from "@/pages/dashboard/Promocode";
 import WithdrawalHistory from "@/pages/dashboard/WithdrawalHistory";
 import Leaderboard from "@/pages/dashboard/Leaderboard";
 import SupportTicket from "@/pages/dashboard/SupportTicket";
-import Messages from "@/pages/dashboard/Messages";
-import ChatCenter from "@/pages/dashboard/ChatCenter";
 
 // Admin Pages
 import AdminLogin from "@/pages/admin/AdminLogin";
@@ -52,8 +50,6 @@ import AdminUpdateProfile from "@/pages/admin/AdminUpdateProfile";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminLoginLogs from "@/pages/admin/AdminLoginLogs";
 import AdminNotifications from "@/pages/admin/AdminNotifications";
-import AdminSubadmins from "@/pages/admin/AdminSubadmins";
-import AdminChats from "@/pages/admin/AdminChats";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -93,8 +89,6 @@ const App = () => (
               <Route path="withdrawal-history" element={<WithdrawalHistory />} />
               <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="support" element={<SupportTicket />} />
-              <Route path="messages" element={<Messages />} />
-              <Route path="chat" element={<ChatCenter />} />
             </Route>
 
             {/* Admin Routes - Requires Admin Role */}
@@ -116,8 +110,6 @@ const App = () => (
               <Route path="settings" element={<AdminSettings />} />
               <Route path="login-logs" element={<AdminLoginLogs />} />
               <Route path="notifications" element={<AdminNotifications />} />
-              <Route path="subadmins" element={<AdminSubadmins />} />
-              <Route path="chats" element={<AdminChats />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
