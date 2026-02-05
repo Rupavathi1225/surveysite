@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, History, Coins, Wallet, UserCheck } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Users, History, Coins, Wallet, UserCheck, Play, Pause } from "lucide-react";
+import LiveActivityFeed from "@/components/dashboard/LiveActivityFeed";
+import { toast } from "sonner";
 
 interface DashboardStats {
   totalUsers: number;
@@ -15,9 +19,12 @@ interface DashboardStats {
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activityFeedEnabled, setActivityFeedEnabled] = useState(true);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
   useEffect(() => {
     fetchStats();
+    fetchActivityFeedSetting();
   }, []);
 
   const fetchStats = async () => {
@@ -38,6 +45,38 @@ export default function AdminDashboard() {
       activeUsers: activeRes.count || 0,
     });
     setIsLoading(false);
+  };
+
+  const fetchActivityFeedSetting = async () => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "live_activity_feed_enabled")
+      .single();
+    
+    if (data) {
+      setActivityFeedEnabled(data.value === "true");
+    }
+    setIsLoadingSettings(false);
+  };
+
+  const toggleActivityFeed = async (enabled: boolean) => {
+    setActivityFeedEnabled(enabled);
+    
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert({ 
+        key: "live_activity_feed_enabled", 
+        value: enabled ? "true" : "false",
+        updated_at: new Date().toISOString()
+      }, { onConflict: "key" });
+
+    if (error) {
+      toast.error("Failed to update setting");
+      setActivityFeedEnabled(!enabled);
+    } else {
+      toast.success(`Live Activity Feed ${enabled ? "enabled" : "disabled"}`);
+    }
   };
 
   const statCards = [
@@ -82,15 +121,52 @@ export default function AdminDashboard() {
       )}
 
       <div className="grid md:grid-cols-2 gap-6">
+        {/* Live Activity Feed with Toggle Control */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest platform activity</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  {activityFeedEnabled ? (
+                    <Play className="h-5 w-5 text-green-500" />
+                  ) : (
+                    <Pause className="h-5 w-5 text-muted-foreground" />
+                  )}
+                  Live Activity Feed
+                </CardTitle>
+                <CardDescription>
+                  {activityFeedEnabled ? "Showing real-time platform activity" : "Activity feed is paused"}
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="activity-toggle" className="text-sm text-muted-foreground">
+                  {activityFeedEnabled ? "On" : "Off"}
+                </Label>
+                <Switch
+                  id="activity-toggle"
+                  checked={activityFeedEnabled}
+                  onCheckedChange={toggleActivityFeed}
+                  disabled={isLoadingSettings}
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-center py-8">
-              Activity feed will appear here
-            </p>
+            {isLoadingSettings ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-12" />
+                ))}
+              </div>
+            ) : activityFeedEnabled ? (
+              <LiveActivityFeed />
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Pause className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>Live Activity Feed is disabled</p>
+                <p className="text-sm">Toggle the switch above to enable</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

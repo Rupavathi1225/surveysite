@@ -26,7 +26,11 @@ interface ActivityItem {
   color: string;
 }
 
-export default function LiveActivityFeed() {
+interface LiveActivityFeedProps {
+  showCard?: boolean;
+}
+
+export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedProps) {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -290,6 +294,45 @@ export default function LiveActivityFeed() {
     return date.toLocaleDateString();
   };
 
+  const content = isLoading ? (
+    <div className="space-y-3">
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} className="h-12" />
+      ))}
+    </div>
+  ) : activities.length === 0 ? (
+    <div className="text-center py-8 text-muted-foreground">
+      <Activity className="h-12 w-12 mx-auto mb-3 opacity-50" />
+      <p>No recent activity</p>
+      <p className="text-sm">Activity will appear here as it happens</p>
+    </div>
+  ) : (
+    <ScrollArea className="h-[350px] pr-4">
+      <div className="space-y-3">
+        {activities.map((activity) => (
+          <div
+            key={activity.id}
+            className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+          >
+            <div className={`mt-0.5 ${activity.color}`}>
+              {activity.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm leading-relaxed">{activity.message}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {formatTime(activity.timestamp)}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
+  );
+
+  if (!showCard) {
+    return content;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -300,40 +343,7 @@ export default function LiveActivityFeed() {
         <CardDescription>Real-time platform activity</CardDescription>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-12" />
-            ))}
-          </div>
-        ) : activities.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Activity className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>No recent activity</p>
-            <p className="text-sm">Activity will appear here as it happens</p>
-          </div>
-        ) : (
-          <ScrollArea className="h-[350px] pr-4">
-            <div className="space-y-3">
-              {activities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                >
-                  <div className={`mt-0.5 ${activity.color}`}>
-                    {activity.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm leading-relaxed">{activity.message}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {formatTime(activity.timestamp)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-        )}
+        {content}
       </CardContent>
     </Card>
   );
