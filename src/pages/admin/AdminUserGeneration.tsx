@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,20 +8,29 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { User, Upload, Sparkles, Clock, Loader2, CheckCircle, Link, FileSpreadsheet } from "lucide-react";
+import { User, Upload, Sparkles, Clock, Loader2, CheckCircle, Link, FileSpreadsheet, Eye, EyeOff, Copy, Users } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 interface GeneratedUser {
   username: string;
   email: string;
+  password: string;
   userId: string;
+  profileId: string;
   scheduledAt: string;
+  method: string;
+  country: string;
 }
 
 export default function AdminUserGeneration() {
   const [isLoading, setIsLoading] = useState(false);
   const [generatedUsers, setGeneratedUsers] = useState<GeneratedUser[]>([]);
+  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+  const [activeResultTab, setActiveResultTab] = useState("all");
+  const [enableScheduling, setEnableScheduling] = useState(true);
   
   // Manual form
   const [manualUsername, setManualUsername] = useState("");
@@ -36,6 +45,15 @@ export default function AdminUserGeneration() {
   const [bulkTimeGap, setBulkTimeGap] = useState(20);
   const [googleSheetLink, setGoogleSheetLink] = useState("");
 
+  // AI form
+  const [aiStyle, setAiStyle] = useState("modern");
+  const [aiLetters, setAiLetters] = useState(4);
+  const [aiNumbers, setAiNumbers] = useState(5);
+  const [aiShuffle, setAiShuffle] = useState(2);
+  const [aiCount, setAiCount] = useState(50);
+  const [aiCountry, setAiCountry] = useState("India");
+  const [aiTimeGap, setAiTimeGap] = useState(20);
+
   // Handle file upload for CSV
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -44,7 +62,6 @@ export default function AdminUserGeneration() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
-      // Parse CSV - handle comma and newline separated values
       const names = text
         .split(/[\n,]/)
         .map(n => n.trim().replace(/"/g, ''))
@@ -55,21 +72,28 @@ export default function AdminUserGeneration() {
     reader.readAsText(file);
   };
 
-  // AI form
-  const [aiStyle, setAiStyle] = useState("modern");
-  const [aiLetters, setAiLetters] = useState(4);
-  const [aiNumbers, setAiNumbers] = useState(5);
-  const [aiShuffle, setAiShuffle] = useState(2);
-  const [aiCount, setAiCount] = useState(50);
-  const [aiCountry, setAiCountry] = useState("India");
-  const [aiTimeGap, setAiTimeGap] = useState(20);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard");
+  };
+
+  const togglePasswordVisibility = (userId: string) => {
+    setShowPasswords(prev => ({ ...prev, [userId]: !prev[userId] }));
+  };
+
+  const getTimeGap = (method: string) => {
+    if (!enableScheduling) return 0;
+    if (method === "manual") return manualTimeGap;
+    if (method === "bulk_csv") return bulkTimeGap;
+    return aiTimeGap;
+  };
 
   const generateUsers = async (method: "manual" | "bulk_csv" | "ai_based") => {
     setIsLoading(true);
-    setGeneratedUsers([]);
 
     try {
       let body: Record<string, unknown> = {};
+      const timeGap = enableScheduling ? getTimeGap(method) : 0;
 
       if (method === "manual") {
         if (!manualUsername.trim()) {
@@ -82,7 +106,7 @@ export default function AdminUserGeneration() {
           baseUsername: manualUsername.trim(),
           count: manualCount,
           country: manualCountry,
-          timeGapMinutes: manualTimeGap,
+          timeGapMinutes: timeGap,
         };
       } else if (method === "bulk_csv") {
         const names = bulkUsernames.split("\n").map(n => n.trim()).filter(Boolean);
@@ -96,7 +120,7 @@ export default function AdminUserGeneration() {
           baseUsernames: names,
           count: bulkCount,
           country: bulkCountry,
-          timeGapMinutes: bulkTimeGap,
+          timeGapMinutes: timeGap,
         };
       } else {
         body = {
@@ -107,7 +131,7 @@ export default function AdminUserGeneration() {
           shuffleAfter: aiShuffle,
           count: aiCount,
           country: aiCountry,
-          timeGapMinutes: aiTimeGap,
+          timeGapMinutes: timeGap,
         };
       }
 
@@ -116,8 +140,9 @@ export default function AdminUserGeneration() {
       if (error) throw error;
 
       if (data.success) {
-        setGeneratedUsers(data.users);
+        setGeneratedUsers(prev => [...data.users, ...prev]);
         toast.success(`Successfully created ${data.created} users!`);
+        setActiveResultTab(method);
       } else {
         throw new Error(data.error || "Failed to generate users");
       }
@@ -133,6 +158,26 @@ export default function AdminUserGeneration() {
     return new Date(isoString).toLocaleString();
   };
 
+  const getMethodBadge = (method: string) => {
+    switch (method) {
+      case "manual":
+        return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30">Manual</Badge>;
+      case "bulk_csv":
+        return <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/30">Bulk</Badge>;
+      case "ai_based":
+        return <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/30">AI</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
+    }
+  };
+
+  const filteredUsers = activeResultTab === "all" 
+    ? generatedUsers 
+    : generatedUsers.filter(u => u.method === activeResultTab);
+
+  const getUserCountByMethod = (method: string) => 
+    generatedUsers.filter(u => u.method === method).length;
+
   return (
     <div className="space-y-6">
       <div>
@@ -147,6 +192,25 @@ export default function AdminUserGeneration() {
             <CardDescription>Choose how to create users</CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Scheduling Toggle */}
+            <div className="flex items-center justify-between p-3 mb-4 rounded-lg border bg-muted/50">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Activity Scheduling</p>
+                  <p className="text-xs text-muted-foreground">
+                    {enableScheduling 
+                      ? "Users appear gradually in activity feed" 
+                      : "Users appear immediately"}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={enableScheduling}
+                onCheckedChange={setEnableScheduling}
+              />
+            </div>
+
             <Tabs defaultValue="manual">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="manual" className="flex items-center gap-2">
@@ -204,22 +268,24 @@ export default function AdminUserGeneration() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Time Gap: {manualTimeGap} minutes
-                  </Label>
-                  <Slider
-                    value={[manualTimeGap]}
-                    onValueChange={([v]) => setManualTimeGap(v)}
-                    min={1}
-                    max={120}
-                    step={1}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Each user's signup will appear {manualTimeGap} minutes apart in the activity feed
-                  </p>
-                </div>
+                {enableScheduling && (
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Time Gap: {manualTimeGap} minutes
+                    </Label>
+                    <Slider
+                      value={[manualTimeGap]}
+                      onValueChange={([v]) => setManualTimeGap(v)}
+                      min={1}
+                      max={120}
+                      step={1}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      User 1 at now, User 2 after {manualTimeGap} mins, User 3 after {manualTimeGap * 2} mins...
+                    </p>
+                  </div>
+                )}
 
                 <Button 
                   onClick={() => generateUsers("manual")} 
@@ -233,7 +299,6 @@ export default function AdminUserGeneration() {
 
               {/* Bulk Tab */}
               <TabsContent value="bulk" className="space-y-4 mt-4">
-                {/* Google Sheet Link */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Link className="h-4 w-4" />
@@ -249,7 +314,6 @@ export default function AdminUserGeneration() {
                   </p>
                 </div>
 
-                {/* CSV File Upload */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <FileSpreadsheet className="h-4 w-4" />
@@ -280,9 +344,6 @@ export default function AdminUserGeneration() {
                     onChange={(e) => setBulkUsernames(e.target.value)}
                     rows={5}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Each name will generate multiple users with random suffixes
-                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -312,22 +373,24 @@ export default function AdminUserGeneration() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Time Gap: {bulkTimeGap} minutes
-                  </Label>
-                  <Slider
-                    value={[bulkTimeGap]}
-                    onValueChange={([v]) => setBulkTimeGap(v)}
-                    min={1}
-                    max={120}
-                    step={1}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    User 1 appears now, User 2 after {bulkTimeGap} mins, User 3 after {bulkTimeGap * 2} mins...
-                  </p>
-                </div>
+                {enableScheduling && (
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Time Gap: {bulkTimeGap} minutes
+                    </Label>
+                    <Slider
+                      value={[bulkTimeGap]}
+                      onValueChange={([v]) => setBulkTimeGap(v)}
+                      min={1}
+                      max={120}
+                      step={1}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      User 1 at now, User 2 after {bulkTimeGap} mins, User 3 after {bulkTimeGap * 2} mins...
+                    </p>
+                  </div>
+                )}
 
                 <Button 
                   onClick={() => generateUsers("bulk_csv")} 
@@ -389,9 +452,6 @@ export default function AdminUserGeneration() {
                     max={5}
                     step={1}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Pattern changes after every {aiShuffle} characters
-                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -421,19 +481,21 @@ export default function AdminUserGeneration() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Time Gap: {aiTimeGap} minutes
-                  </Label>
-                  <Slider
-                    value={[aiTimeGap]}
-                    onValueChange={([v]) => setAiTimeGap(v)}
-                    min={1}
-                    max={120}
-                    step={1}
-                  />
-                </div>
+                {enableScheduling && (
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Time Gap: {aiTimeGap} minutes
+                    </Label>
+                    <Slider
+                      value={[aiTimeGap]}
+                      onValueChange={([v]) => setAiTimeGap(v)}
+                      min={1}
+                      max={120}
+                      step={1}
+                    />
+                  </div>
+                )}
 
                 <Button 
                   onClick={() => generateUsers("ai_based")} 
@@ -448,7 +510,7 @@ export default function AdminUserGeneration() {
           </CardContent>
         </Card>
 
-        {/* Results Panel */}
+        {/* Results Panel with Sections */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -457,7 +519,7 @@ export default function AdminUserGeneration() {
             </CardTitle>
             <CardDescription>
               {generatedUsers.length > 0 
-                ? `${generatedUsers.length} users created with scheduled activities`
+                ? `${generatedUsers.length} users created with login credentials`
                 : "Users will appear here after generation"}
             </CardDescription>
           </CardHeader>
@@ -469,30 +531,113 @@ export default function AdminUserGeneration() {
                 <p className="text-sm">Choose a method and generate users</p>
               </div>
             ) : (
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-2">
-                  {generatedUsers.map((user, index) => (
-                    <div
-                      key={user.userId}
-                      className="flex items-center justify-between p-3 rounded-lg border bg-card"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
-                          {index + 1}
+              <>
+                {/* Section Tabs */}
+                <Tabs value={activeResultTab} onValueChange={setActiveResultTab} className="mb-4">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="all" className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      All ({generatedUsers.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="manual" className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      Manual ({getUserCountByMethod("manual")})
+                    </TabsTrigger>
+                    <TabsTrigger value="bulk_csv" className="flex items-center gap-1">
+                      <Upload className="h-3 w-3" />
+                      Bulk ({getUserCountByMethod("bulk_csv")})
+                    </TabsTrigger>
+                    <TabsTrigger value="ai_based" className="flex items-center gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      AI ({getUserCountByMethod("ai_based")})
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-2">
+                    {filteredUsers.map((user, index) => (
+                      <div
+                        key={user.userId}
+                        className="p-3 rounded-lg border bg-card space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">{user.username}</p>
+                                {getMethodBadge(user.method)}
+                              </div>
+                              <p className="text-xs text-muted-foreground">{user.email}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant="secondary" className="text-xs">
+                              {user.country}
+                            </Badge>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{user.username}</p>
-                          <p className="text-xs text-muted-foreground">{user.email}</p>
+
+                        {/* Password Row */}
+                        <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
+                          <span className="text-xs text-muted-foreground">Password:</span>
+                          <code className="text-xs font-mono flex-1">
+                            {showPasswords[user.userId] ? user.password : "••••••••••••"}
+                          </code>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6"
+                            onClick={() => togglePasswordVisibility(user.userId)}
+                          >
+                            {showPasswords[user.userId] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6"
+                            onClick={() => copyToClipboard(user.password)}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
                         </div>
+
+                        {/* Scheduled Time */}
+                        {enableScheduling && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>Appears in feed at: {formatTime(user.scheduledAt)}</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">Appears at</p>
-                        <p className="text-sm">{formatTime(user.scheduledAt)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
+                    ))}
+                  </div>
+                </ScrollArea>
+
+                {/* Export Button */}
+                <Button
+                  variant="outline"
+                  className="w-full mt-4"
+                  onClick={() => {
+                    const csv = "Username,Email,Password,Country,Method,Scheduled At\n" + 
+                      filteredUsers.map(u => 
+                        `${u.username},${u.email},${u.password},${u.country},${u.method},${u.scheduledAt}`
+                      ).join("\n");
+                    const blob = new Blob([csv], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `generated-users-${new Date().toISOString().split('T')[0]}.csv`;
+                    a.click();
+                  }}
+                >
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Export to CSV
+                </Button>
+              </>
             )}
           </CardContent>
         </Card>
