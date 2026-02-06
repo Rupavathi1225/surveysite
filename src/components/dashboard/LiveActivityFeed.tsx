@@ -36,7 +36,7 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
   const [activityToggles, setActivityToggles] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    fetchActivityToggles().then(() => fetchActivities());
+    fetchActivities();
     
     // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
@@ -46,7 +46,7 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
     return () => clearInterval(interval);
   }, []);
 
-  const fetchActivityToggles = async () => {
+  const fetchActivityToggles = async (): Promise<Record<string, boolean>> => {
     const { data } = await supabase
       .from("site_settings")
       .select("key, value")
@@ -62,6 +62,10 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
 
   const fetchActivities = async () => {
     setIsLoading(true);
+    
+    // Fetch current toggles first
+    const currentToggles = await fetchActivityToggles();
+    
     const allActivities: ActivityItem[] = [];
 
     // 0. Fetch scheduled activities that are due to be displayed
@@ -355,8 +359,9 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
       };
       
       const toggleKey = toggleMap[activity.type];
-      // Default to true if toggle not found
-      return toggleKey ? (activityToggles[toggleKey] !== false) : true;
+      // Default to true if toggle not found, but respect explicit false values
+      if (!toggleKey) return true;
+      return currentToggles[toggleKey] !== false;
     });
 
     // Take the most recent 20 activities
