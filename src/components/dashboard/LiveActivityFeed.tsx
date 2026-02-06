@@ -33,9 +33,10 @@ interface LiveActivityFeedProps {
 export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedProps) {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activityToggles, setActivityToggles] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    fetchActivities();
+    fetchActivityToggles().then(() => fetchActivities());
     
     // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
@@ -44,6 +45,20 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
     
     return () => clearInterval(interval);
   }, []);
+
+  const fetchActivityToggles = async () => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("key, value")
+      .like("key", "activity_feed_%");
+
+    const toggles: Record<string, boolean> = {};
+    data?.forEach(item => {
+      toggles[item.key] = item.value === "true";
+    });
+    setActivityToggles(toggles);
+    return toggles;
+  };
 
   const fetchActivities = async () => {
     setIsLoading(true);
@@ -324,8 +339,28 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
     // Sort all activities by timestamp (newest first)
     allActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
+    // Filter based on activity toggles
+    const filteredActivities = allActivities.filter(activity => {
+      const toggleMap: Record<string, string> = {
+        signup: "activity_feed_signups",
+        login: "activity_feed_logins",
+        promocode_redeemed: "activity_feed_promocode_redeemed",
+        promocode_added: "activity_feed_promocode_added",
+        offer_completed: "activity_feed_offer_completed",
+        offer_added: "activity_feed_offer_added",
+        payment_requested: "activity_feed_payment_requested",
+        payment_completed: "activity_feed_payment_completed",
+        notification: "activity_feed_notifications",
+        credits: "activity_feed_promocode_redeemed", // referral credits follow promocode toggle
+      };
+      
+      const toggleKey = toggleMap[activity.type];
+      // Default to true if toggle not found
+      return toggleKey ? (activityToggles[toggleKey] !== false) : true;
+    });
+
     // Take the most recent 20 activities
-    setActivities(allActivities.slice(0, 20));
+    setActivities(filteredActivities.slice(0, 20));
     setIsLoading(false);
   };
 
