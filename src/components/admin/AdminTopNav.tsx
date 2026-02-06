@@ -25,6 +25,7 @@ import {
   Bell,
   Shield,
   MessageSquare,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +54,7 @@ const monitoringMenuItems = [
   { icon: Bell, label: "Notifications", path: "/admin/notifications" },
   { icon: MessageSquare, label: "User Chats", path: "/admin/chats" },
   { icon: Shield, label: "Subadmins", path: "/admin/subadmins" },
+  { icon: UserPlus, label: "User Generation", path: "/admin/user-generation" },
 ];
 
 const mastersMenuItems = [

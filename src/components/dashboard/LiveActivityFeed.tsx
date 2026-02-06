@@ -49,7 +49,50 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
     setIsLoading(true);
     const allActivities: ActivityItem[] = [];
 
-    // 1. New User Signups (recent profiles)
+    // 0. Fetch scheduled activities that are due to be displayed
+    const { data: scheduledActivities } = await supabase
+      .from("scheduled_activities")
+      .select("*")
+      .lte("scheduled_at", new Date().toISOString())
+      .order("scheduled_at", { ascending: false })
+      .limit(20);
+
+    if (scheduledActivities) {
+      // Mark them as displayed and add to feed
+      const idsToUpdate = scheduledActivities.filter(a => !a.is_displayed).map(a => a.id);
+      if (idsToUpdate.length > 0) {
+        await supabase
+          .from("scheduled_activities")
+          .update({ is_displayed: true })
+          .in("id", idsToUpdate);
+      }
+
+      scheduledActivities.forEach((activity) => {
+        const iconMap: Record<string, React.ReactNode> = {
+          "user-plus": <UserPlus className="h-4 w-4" />,
+          "login": <LogIn className="h-4 w-4" />,
+          "gift": <Gift className="h-4 w-4" />,
+          "check": <CheckCircle className="h-4 w-4" />,
+          "coins": <Coins className="h-4 w-4" />,
+          "wallet": <Wallet className="h-4 w-4" />,
+          "credit-card": <CreditCard className="h-4 w-4" />,
+          "bell": <Bell className="h-4 w-4" />,
+          "flame": <Flame className="h-4 w-4" />,
+          "plus": <Plus className="h-4 w-4" />,
+        };
+        
+        allActivities.push({
+          id: `scheduled-${activity.id}`,
+          type: activity.activity_type,
+          message: activity.message,
+          timestamp: activity.scheduled_at,
+          icon: iconMap[activity.icon_type] || <Activity className="h-4 w-4" />,
+          color: activity.icon_color || "text-green-500",
+        });
+      });
+    }
+
+    // 1. New User Signups (recent profiles - exclude generated users)
     const { data: newUsers } = await supabase
       .from("profiles")
       .select("id, username, first_name, created_at")
@@ -92,7 +135,7 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
       });
     }
 
-    // 3. Promocode Redemptions (from earning_history with type 'promocode')
+    // 3. Promocode Redemptions
     const { data: promoRedemptions } = await supabase
       .from("earning_history")
       .select(`
@@ -117,7 +160,7 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
       });
     }
 
-    // 4. Offer/Survey Completions (from earning_history with type 'survey' or 'offer')
+    // 4. Offer/Survey Completions
     const { data: completedOffers } = await supabase
       .from("earning_history")
       .select(`
@@ -167,7 +210,7 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
       });
     }
 
-    // 6. New Promocodes Added (by admin)
+    // 6. New Promocodes Added
     const { data: newPromocodes } = await supabase
       .from("promocodes")
       .select("id, code, name, reward, created_at")
@@ -228,7 +271,7 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
       });
     }
 
-    // 9. Payment Requests (Pending Withdrawals)
+    // 9. Payment Requests
     const { data: pendingWithdrawals } = await supabase
       .from("withdrawals")
       .select(`
@@ -253,7 +296,7 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
       });
     }
 
-    // 10. Completed Payments (Success Withdrawals)
+    // 10. Completed Payments
     const { data: completedWithdrawals } = await supabase
       .from("withdrawals")
       .select(`
