@@ -290,6 +290,48 @@ export type Database = {
           },
         ]
       }
+      generated_user_batches: {
+        Row: {
+          ai_config: Json | null
+          base_usernames: string[] | null
+          batch_name: string
+          country: string | null
+          created_at: string
+          created_by: string | null
+          generation_method: string
+          id: string
+          status: string | null
+          time_gap_minutes: number
+          total_users: number
+        }
+        Insert: {
+          ai_config?: Json | null
+          base_usernames?: string[] | null
+          batch_name: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          generation_method: string
+          id?: string
+          status?: string | null
+          time_gap_minutes?: number
+          total_users?: number
+        }
+        Update: {
+          ai_config?: Json | null
+          base_usernames?: string[] | null
+          batch_name?: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          generation_method?: string
+          id?: string
+          status?: string | null
+          time_gap_minutes?: number
+          total_users?: number
+        }
+        Relationships: []
+      }
       login_logs: {
         Row: {
           browser: string | null
@@ -779,6 +821,56 @@ export type Database = {
           timezone?: string | null
         }
         Relationships: []
+      }
+      scheduled_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          created_by: string | null
+          icon_color: string
+          icon_type: string
+          id: string
+          is_displayed: boolean
+          message: string
+          metadata: Json | null
+          related_user_id: string | null
+          scheduled_at: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          created_by?: string | null
+          icon_color?: string
+          icon_type?: string
+          id?: string
+          is_displayed?: boolean
+          message: string
+          metadata?: Json | null
+          related_user_id?: string | null
+          scheduled_at: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          created_by?: string | null
+          icon_color?: string
+          icon_type?: string
+          id?: string
+          is_displayed?: boolean
+          message?: string
+          metadata?: Json | null
+          related_user_id?: string | null
+          scheduled_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_activities_related_user_id_fkey"
+            columns: ["related_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_settings: {
         Row: {

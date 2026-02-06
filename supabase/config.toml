@@ -1,1 +1,4 @@
 project_id = "msqssfqcrclurfuskipd"
+
+[functions.generate-usernames]
+verify_jwt = false
