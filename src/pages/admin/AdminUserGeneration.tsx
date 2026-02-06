@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { User, Upload, Sparkles, Clock, Loader2, CheckCircle } from "lucide-react";
+import { User, Upload, Sparkles, Clock, Loader2, CheckCircle, Link, FileSpreadsheet } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface GeneratedUser {
@@ -34,6 +34,26 @@ export default function AdminUserGeneration() {
   const [bulkCount, setBulkCount] = useState(30);
   const [bulkCountry, setBulkCountry] = useState("India");
   const [bulkTimeGap, setBulkTimeGap] = useState(20);
+  const [googleSheetLink, setGoogleSheetLink] = useState("");
+
+  // Handle file upload for CSV
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      // Parse CSV - handle comma and newline separated values
+      const names = text
+        .split(/[\n,]/)
+        .map(n => n.trim().replace(/"/g, ''))
+        .filter(Boolean);
+      setBulkUsernames(names.join('\n'));
+      toast.success(`Loaded ${names.length} usernames from file`);
+    };
+    reader.readAsText(file);
+  };
 
   // AI form
   const [aiStyle, setAiStyle] = useState("modern");
@@ -213,6 +233,45 @@ export default function AdminUserGeneration() {
 
               {/* Bulk Tab */}
               <TabsContent value="bulk" className="space-y-4 mt-4">
+                {/* Google Sheet Link */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Link className="h-4 w-4" />
+                    Google Sheet Link (optional)
+                  </Label>
+                  <Input
+                    placeholder="https://docs.google.com/spreadsheets/d/..."
+                    value={googleSheetLink}
+                    onChange={(e) => setGoogleSheetLink(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Sheet must be publicly accessible with usernames in first column
+                  </p>
+                </div>
+
+                {/* CSV File Upload */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <FileSpreadsheet className="h-4 w-4" />
+                    Upload CSV/Excel File
+                  </Label>
+                  <Input
+                    type="file"
+                    accept=".csv,.xlsx,.xls,.txt"
+                    onChange={handleFileUpload}
+                    className="cursor-pointer"
+                  />
+                </div>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or enter manually</span>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label>Base Usernames (one per line)</Label>
                   <Textarea
@@ -265,6 +324,9 @@ export default function AdminUserGeneration() {
                     max={120}
                     step={1}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    User 1 appears now, User 2 after {bulkTimeGap} mins, User 3 after {bulkTimeGap * 2} mins...
+                  </p>
                 </div>
 
                 <Button 

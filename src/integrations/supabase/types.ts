@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_chats: {
         Row: {
           admin_id: string | null
@@ -1166,6 +1201,7 @@ export type Database = {
           account_id: string
           admin_note: string | null
           amount: number
+          approved_at: string | null
           created_at: string
           fee: number | null
           id: string
@@ -1179,6 +1215,7 @@ export type Database = {
           account_id: string
           admin_note?: string | null
           amount: number
+          approved_at?: string | null
           created_at?: string
           fee?: number | null
           id?: string
@@ -1192,6 +1229,7 @@ export type Database = {
           account_id?: string
           admin_note?: string | null
           amount?: number
+          approved_at?: string | null
           created_at?: string
           fee?: number | null
           id?: string
@@ -1236,13 +1274,29 @@ export type Database = {
         Args: { _conversation_id: string; _profile_id: string }
         Returns: boolean
       }
-      redeem_promocode: {
-        Args: {
-          p_code: string
-          p_promocode_id: string
-          p_reward: number
-          p_user_id: string
-        }
+      redeem_promocode:
+        | {
+            Args: {
+              p_code: string
+              p_promocode_id: string
+              p_reward: number
+              p_user_id: string
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              p_code: string
+              p_credit_amount?: number
+              p_is_gift_card?: boolean
+              p_promocode_id: string
+              p_reward: number
+              p_user_id: string
+            }
+            Returns: Json
+          }
+      update_user_balance: {
+        Args: { p_amount: number; p_operation: string; p_user_id: string }
         Returns: boolean
       }
     }
