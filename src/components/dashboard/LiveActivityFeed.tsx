@@ -36,6 +36,13 @@ export default function LiveActivityFeed({ showCard = false }: LiveActivityFeedP
 
   useEffect(() => {
     fetchActivities();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchActivities();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchActivities = async () => {
