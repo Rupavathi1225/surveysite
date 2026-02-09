@@ -22,6 +22,7 @@ import {
   MessageCircle,
   MessageSquare,
   Shield,
+  TicketPercent,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -35,9 +36,10 @@ const menuItems = [
   { icon: Wallet, label: "Withdrawal", path: "/dashboard/withdraw" },
   { icon: ArrowRightLeft, label: "Convert Points", path: "/dashboard/convert" },
   { icon: ClipboardCheck, label: "Daily Surveys", path: "/dashboard/surveys" },
+  { icon: Gift, label: "Offers", path: "/dashboard/offers" },
   { icon: Trophy, label: "Contest", path: "/dashboard/contest" },
   { icon: Megaphone, label: "News", path: "/dashboard/news" },
-  { icon: Gift, label: "Promocode", path: "/dashboard/promocode" },
+  { icon: TicketPercent, label: "Promocode", path: "/dashboard/promocode" },
   { icon: Receipt, label: "Withdrawal History", path: "/dashboard/withdrawal-history" },
   { icon: Medal, label: "Leaderboard", path: "/dashboard/leaderboard" },
   { icon: LifeBuoy, label: "Support Ticket", path: "/dashboard/support" },
