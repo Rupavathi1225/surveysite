@@ -26,7 +26,6 @@ import {
   Shield,
   MessageSquare,
   UserPlus,
-  Gift,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,7 +58,6 @@ const monitoringMenuItems = [
 ];
 
 const mastersMenuItems = [
-  { icon: Gift, label: "Offers", path: "/admin/offers" },
   { icon: Newspaper, label: "News", path: "/admin/news" },
   { icon: TicketPercent, label: "Promocodes", path: "/admin/promocodes" },
   { icon: FileText, label: "Pages", path: "/admin/pages" },

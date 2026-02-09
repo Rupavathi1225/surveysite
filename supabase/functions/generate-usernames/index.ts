@@ -97,12 +97,8 @@ serve(async (req) => {
       createdUsers.push({
         username,
         email,
-        password, // Include password so admin can share credentials
         userId: authData.user.id,
-        profileId: profile?.id,
-        scheduledAt: scheduledAt.toISOString(),
-        method: config.method,
-        country: config.country
+        scheduledAt: scheduledAt.toISOString()
       });
     }
 

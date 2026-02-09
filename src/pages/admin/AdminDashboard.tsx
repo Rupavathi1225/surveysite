@@ -6,7 +6,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Users, History, Coins, Wallet, UserCheck, Play, Pause } from "lucide-react";
 import LiveActivityFeed from "@/components/dashboard/LiveActivityFeed";
-import ActivityFeedToggles from "@/components/admin/ActivityFeedToggles";
 import { toast } from "sonner";
 
 interface DashboardStats {
@@ -171,9 +170,17 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
-          <ActivityFeedToggles />
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common administrative tasks</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-muted-foreground text-center py-8">
+              Quick action buttons will appear here
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

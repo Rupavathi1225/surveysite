@@ -106,14 +106,11 @@ export default function Promocode() {
     }
 
     // Use RPC function to update points, earning history, and promocode usage
-    // Pass all parameters to avoid function overload ambiguity
     const { data: redeemResult, error: redeemError } = await supabase.rpc("redeem_promocode", {
       p_user_id: profile.id,
       p_promocode_id: promocode.id,
       p_reward: promocode.reward,
       p_code: promocode.code,
-      p_is_gift_card: promocode.is_gift_card || false,
-      p_credit_amount: promocode.credit_amount || 0,
     });
 
     if (redeemError) {

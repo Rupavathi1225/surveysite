@@ -32,7 +32,6 @@ import Leaderboard from "@/pages/dashboard/Leaderboard";
 import SupportTicket from "@/pages/dashboard/SupportTicket";
 import Messages from "@/pages/dashboard/Messages";
 import ChatCenter from "@/pages/dashboard/ChatCenter";
-import Offers from "@/pages/dashboard/Offers";
 
 // Admin Pages
 import AdminLogin from "@/pages/admin/AdminLogin";
@@ -56,7 +55,6 @@ import AdminNotifications from "@/pages/admin/AdminNotifications";
 import AdminSubadmins from "@/pages/admin/AdminSubadmins";
 import AdminChats from "@/pages/admin/AdminChats";
 import AdminUserGeneration from "@/pages/admin/AdminUserGeneration";
-import AdminOffers from "@/pages/admin/AdminOffers";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -90,7 +88,6 @@ const App = () => (
               <Route path="withdraw" element={<Withdrawal />} />
               <Route path="convert" element={<ConvertPoints />} />
               <Route path="surveys" element={<DailySurveys />} />
-              <Route path="offers" element={<Offers />} />
               <Route path="contest" element={<Contest />} />
               <Route path="news" element={<News />} />
               <Route path="promocode" element={<Promocode />} />
@@ -123,7 +120,6 @@ const App = () => (
               <Route path="subadmins" element={<AdminSubadmins />} />
               <Route path="chats" element={<AdminChats />} />
               <Route path="user-generation" element={<AdminUserGeneration />} />
-              <Route path="offers" element={<AdminOffers />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
