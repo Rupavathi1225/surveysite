@@ -568,6 +568,84 @@ export type Database = {
           },
         ]
       }
+      offers: {
+        Row: {
+          added_by: string | null
+          allowed_countries: string[] | null
+          country: string[] | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          device: string | null
+          devices: string[] | null
+          expiry: string | null
+          image_url: string | null
+          is_active: boolean | null
+          non_access_url: string | null
+          offer_id: string
+          payout: number
+          payout_model: string | null
+          percent: number | null
+          platform: string | null
+          preview_url: string | null
+          title: string
+          traffic_sources: string[] | null
+          updated_at: string | null
+          url: string
+          vertical: string | null
+        }
+        Insert: {
+          added_by?: string | null
+          allowed_countries?: string[] | null
+          country?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          device?: string | null
+          devices?: string[] | null
+          expiry?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          non_access_url?: string | null
+          offer_id: string
+          payout: number
+          payout_model?: string | null
+          percent?: number | null
+          platform?: string | null
+          preview_url?: string | null
+          title: string
+          traffic_sources?: string[] | null
+          updated_at?: string | null
+          url: string
+          vertical?: string | null
+        }
+        Update: {
+          added_by?: string | null
+          allowed_countries?: string[] | null
+          country?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          device?: string | null
+          devices?: string[] | null
+          expiry?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          non_access_url?: string | null
+          offer_id?: string
+          payout?: number
+          payout_model?: string | null
+          percent?: number | null
+          platform?: string | null
+          preview_url?: string | null
+          title?: string
+          traffic_sources?: string[] | null
+          updated_at?: string | null
+          url?: string
+          vertical?: string | null
+        }
+        Relationships: []
+      }
       page_visits: {
         Row: {
           id: string
