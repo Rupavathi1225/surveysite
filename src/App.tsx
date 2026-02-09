@@ -32,6 +32,7 @@ import Leaderboard from "@/pages/dashboard/Leaderboard";
 import SupportTicket from "@/pages/dashboard/SupportTicket";
 import Messages from "@/pages/dashboard/Messages";
 import ChatCenter from "@/pages/dashboard/ChatCenter";
+import Offers from "@/pages/dashboard/Offers";
 
 // Admin Pages
 import AdminLogin from "@/pages/admin/AdminLogin";
@@ -89,6 +90,7 @@ const App = () => (
               <Route path="withdraw" element={<Withdrawal />} />
               <Route path="convert" element={<ConvertPoints />} />
               <Route path="surveys" element={<DailySurveys />} />
+              <Route path="offers" element={<Offers />} />
               <Route path="contest" element={<Contest />} />
               <Route path="news" element={<News />} />
               <Route path="promocode" element={<Promocode />} />

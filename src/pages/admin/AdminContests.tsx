@@ -83,14 +83,32 @@ export default function AdminContests() {
   };
 
   const handleSave = async () => {
+    // Validate required fields
+    if (!formData.title.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    if (!formData.start_date) {
+      toast.error("Start date is required");
+      return;
+    }
+    if (!formData.end_date) {
+      toast.error("End date is required");
+      return;
+    }
+    if (formData.amount <= 0) {
+      toast.error("Amount must be greater than 0");
+      return;
+    }
+
     setIsSaving(true);
     
     const saveData = {
       title: formData.title,
-      description: formData.description,
+      description: formData.description || null,
       amount: formData.amount,
-      start_date: formData.start_date,
-      end_date: formData.end_date,
+      start_date: new Date(formData.start_date).toISOString(),
+      end_date: new Date(formData.end_date).toISOString(),
       status: formData.status,
       excluded_users: formData.excluded_users,
     };
@@ -101,8 +119,10 @@ export default function AdminContests() {
         .update(saveData)
         .eq("id", editingContest.id);
 
-      if (error) toast.error("Failed to update");
-      else {
+      if (error) {
+        console.error("Contest update error:", error);
+        toast.error("Failed to update: " + error.message);
+      } else {
         toast.success("Contest updated!");
         setEditingContest(null);
         fetchContests();
@@ -110,8 +130,10 @@ export default function AdminContests() {
     } else {
       const { error } = await supabase.from("contests").insert(saveData);
 
-      if (error) toast.error("Failed to create");
-      else {
+      if (error) {
+        console.error("Contest create error:", error);
+        toast.error("Failed to create: " + error.message);
+      } else {
         toast.success("Contest created!");
         setIsAddOpen(false);
         fetchContests();
