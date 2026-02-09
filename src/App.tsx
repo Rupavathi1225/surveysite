@@ -55,6 +55,7 @@ import AdminNotifications from "@/pages/admin/AdminNotifications";
 import AdminSubadmins from "@/pages/admin/AdminSubadmins";
 import AdminChats from "@/pages/admin/AdminChats";
 import AdminUserGeneration from "@/pages/admin/AdminUserGeneration";
+import AdminOffers from "@/pages/admin/AdminOffers";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -120,6 +121,7 @@ const App = () => (
               <Route path="subadmins" element={<AdminSubadmins />} />
               <Route path="chats" element={<AdminChats />} />
               <Route path="user-generation" element={<AdminUserGeneration />} />
+              <Route path="offers" element={<AdminOffers />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
